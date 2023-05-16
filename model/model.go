@@ -15,14 +15,13 @@ const (
 	ClideStateStart        = 0
 	ClideStatePathSelect   = 1
 	ClideStatePromptSelect = 2
-	ClideStatePromptInput  = 3
+	ClideStatePromptInput   = 3
 	ClideStateDone         = 4
 	ClideStateError        = 5
 )
 
 type Clide struct {
 	state     int
-	prompt    string
 	error     string
 	ready     bool
 	width     int
@@ -32,6 +31,8 @@ type Clide struct {
 	list      list.Model
 	node      *node.CommandNode
 	root      *node.CommandNode
+	params    []node.CommandNodeParameters
+	param     int
 }
 
 func (m Clide) Init() tea.Cmd {
@@ -46,13 +47,14 @@ func (m Clide) View() string {
 	switch m.state {
 
 	case ClideStatePathSelect:
-		fallthrough
-	case ClideStatePromptSelect:
-		m.list.Title = m.prompt
+		m.list.Title = "Continue"
 		return m.list.View()
 
-    case ClideStatePromptInput:
-        m.textinput.Prompt = m.prompt
+    case ClideStatePromptSelect:
+		m.list.Title = m.params[m.param].Name
+        return m.list.View()
+
+	case ClideStatePromptInput:
         return m.textinput.View()
 
 	case ClideStateError:
@@ -72,9 +74,9 @@ func New() Clide {
 		return Clide{}.Error(err.Error())
 	}
 
-    if root == nil {
+	if root == nil {
 		return Clide{}.Error("No clide project found.")
-    }
+	}
 
 	return Clide{
 		root: root,

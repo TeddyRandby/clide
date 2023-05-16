@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"unicode"
+
+	"golang.org/x/exp/slices"
 )
 
 const (
@@ -27,32 +30,63 @@ const (
 	CommandNodeParamTypeCheckbox = "Checkbox"
 )
 
-type CommandNodeParam struct {
-	Name string
-	Type string
+type CommandNodeParameters struct {
+	Shortcut string
+	Name     string
+	Type     string
 }
 
 func (n CommandNode) Title() string       { return fmt.Sprintf("[%s] %s", n.Type, n.Name) }
 func (n CommandNode) Description() string { return n.Path }
 func (n CommandNode) FilterValue() string { return n.Path }
 
-func (n CommandNode) Parameters() []CommandNodeParam {
-	params := make([]CommandNodeParam, 0)
-	steps := filepath.SplitList(n.Path)
+func nameAndShortcut(original string) (string, string) {
+	name := strings.ToLower(strings.Trim(original, "[]{}<>"))
 
-    for _, step := range steps {
-        if strings.Contains(step, "[") {
-            params = append(params, CommandNodeParam{
-                Name: strings.Trim(step, "[]"),
-                Type: CommandNodeParamTypeInput,
-            })
-        } else if strings.Contains(step, "{") {
-            params = append(params, CommandNodeParam{
-                Name: strings.Trim(step, "{}"),
-                Type: CommandNodeParamTypeSelect,
-            })
-        }
-    }
+	var shortcut string
+	for _, char := range original {
+		if unicode.IsUpper(char) {
+			shortcut += string(char)
+		}
+	}
+
+	return name, shortcut
+}
+
+func (n CommandNode) Parameters() []CommandNodeParameters {
+	params := make([]CommandNodeParameters, 0)
+
+	steps := strings.Split(n.Path, "/")
+
+	root := slices.Index(steps, ".clide")
+
+	steps = steps[root+1:]
+
+	for _, step := range steps {
+		if strings.Contains(step, "[") {
+			name, shortcut := nameAndShortcut(step)
+			params = append(params, CommandNodeParameters{
+				Name:     name,
+				Shortcut: shortcut,
+				Type:     CommandNodeParamTypeInput,
+			})
+		} else if strings.Contains(step, "{") {
+			name, shortcut := nameAndShortcut(step)
+			params = append(params, CommandNodeParameters{
+				Name:     name,
+				Shortcut: shortcut,
+				Type:     CommandNodeParamTypeSelect,
+			})
+		} else if strings.Contains(step, "<") {
+			name, shortcut := nameAndShortcut(step)
+			params = append(params, CommandNodeParameters{
+				Name:     name,
+				Shortcut: shortcut,
+				Type:     CommandNodeParamTypeCheckbox,
+			})
+		}
+	}
+
 	return params
 }
 
@@ -83,7 +117,7 @@ func New(parent *CommandNode, pth string) (*CommandNode, error) {
 		return nil, nil
 	}
 
-	if path.PathIsParam(pth) && path.PathIsLeaf(pth) {
+	if path.IsParameter(pth) && path.IsLeaf(pth) {
 		return nil, errors.New("A leaf cannot require a parameter")
 	}
 
@@ -92,7 +126,7 @@ func New(parent *CommandNode, pth string) (*CommandNode, error) {
 	node.Name = name
 	node.Path = pth
 
-	if path.PathIsLeaf(pth) {
+	if path.IsLeaf(pth) {
 		node.Type = NodeTypeCommand
 		return node, nil
 	}
@@ -110,7 +144,7 @@ func New(parent *CommandNode, pth string) (*CommandNode, error) {
 }
 
 func children(parent *CommandNode, dir string) ([]CommandNode, error) {
-	childs, err := path.PathChildren(dir)
+	childs, err := path.Children(dir)
 
 	if err != nil {
 		return nil, err
@@ -118,7 +152,7 @@ func children(parent *CommandNode, dir string) ([]CommandNode, error) {
 
 	var nodes []CommandNode
 	for _, child := range childs {
-		if path.PathIsParam(child) {
+		if path.IsParameter(child) {
 			grandchilds, err := children(parent, child)
 
 			if err != nil {
@@ -127,15 +161,32 @@ func children(parent *CommandNode, dir string) ([]CommandNode, error) {
 
 			nodes = append(nodes, grandchilds...)
 		} else {
-			node, err := New(parent, child)
+			if path.IsLeaf(child) {
+				if strings.Contains(filepath.Base(child), ".") {
+					node, err := New(parent, child)
 
-			if err != nil {
-				return nil, err
+					if err != nil {
+						return nil, err
+					}
+
+					if node != nil {
+						nodes = append(nodes, *node)
+					}
+				}
 			}
 
-			if node != nil {
-				nodes = append(nodes, *node)
+			if path.IsModule(child) {
+				node, err := New(parent, child)
+
+				if err != nil {
+					return nil, err
+				}
+
+				if node != nil {
+					nodes = append(nodes, *node)
+				}
 			}
+
 		}
 	}
 

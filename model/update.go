@@ -2,8 +2,8 @@ package model
 
 import (
 	"clide/node"
+
 	tea "github.com/charmbracelet/bubbletea"
-	"os/exec"
 )
 
 func (m Clide) selectPath(index int) Clide {
@@ -11,15 +11,7 @@ func (m Clide) selectPath(index int) Clide {
 
 	switch n.Type {
 	case node.NodeTypeCommand:
-		cmd := exec.Command(n.Path)
-
-		output, err := cmd.Output()
-
-		if err != nil {
-			return m.Error(err.Error())
-		}
-
-		return m.Done(string(output))
+		return m.Command(&n)
 
 	case node.NodeTypeModule:
 		return m.PromptPath(&n)
@@ -36,8 +28,8 @@ func (m Clide) updateInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "enter":
-            value := m.textinput.Value()
-			return m.Done(value), nil
+			value := m.textinput.Value()
+			return m.SetAndPromptNextArgument(value), nil
 		case "esc":
 			return m.Backtrack(), nil
 		}
@@ -50,13 +42,12 @@ func (m Clide) updateInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Clide) updatePathSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		m.list.SetSize(m.width, m.height)
+	m.list.SetSize(m.width, m.height)
 
+	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "enter", "l":
+		case "enter", "l", "space":
 			m := m.selectPath(m.list.Index())
 			return m, nil
 		case "backspace", "h":
@@ -70,7 +61,31 @@ func (m Clide) updatePathSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+func (m Clide) updateSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
+	m.list.SetSize(m.width, m.height)
+
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "enter", "l":
+			m := m.SetAndPromptNextArgument(m.list.SelectedItem().FilterValue())
+			return m, nil
+		case "backspace", "h":
+			return m.Backtrack(), nil
+		}
+	}
+
+	var cmd tea.Cmd
+	m.list, cmd = m.list.Update(msg)
+
+	return m, cmd
+
+}
+
 func (m Clide) updateDone(msg tea.Msg) (tea.Model, tea.Cmd) {
+	m.viewport.Width = m.width
+	m.viewport.Height = m.height
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -80,9 +95,6 @@ func (m Clide) updateDone(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m.Root(), nil
 		}
 
-	case tea.WindowSizeMsg:
-		m.viewport.Width = m.width
-		m.viewport.Height = m.height
 	}
 
 	var cmd tea.Cmd
@@ -110,8 +122,11 @@ func (m Clide) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case ClideStatePathSelect:
 		return m.updatePathSelect(msg)
 
+	case ClideStatePromptSelect:
+		return m.updateSelect(msg)
+
 	case ClideStatePromptInput:
-        return m.updateInput(msg)
+		return m.updateInput(msg)
 	}
 
 	return m, nil

@@ -6,13 +6,22 @@ import (
 	"strings"
 )
 
-func PathExists(filename string) bool {
+func Exists(filename string) bool {
 	_, err := os.Stat(filename)
 
 	return !os.IsNotExist(err)
 }
 
-func PathChildren(path string) ([]string, error) {
+func HasSibling(path string, child string) string {
+    sibling := filepath.Join(path, "..", child)
+    if Exists(sibling) {
+        return sibling
+    }
+
+    return ""
+}
+
+func Children(path string) ([]string, error) {
 	files, err := os.ReadDir(path)
 
 	if err != nil {
@@ -28,11 +37,11 @@ func PathChildren(path string) ([]string, error) {
 	return children, nil
 }
 
-func PathParent(path string) string {
+func Parent(path string) string {
     return filepath.Join(path, "..")
 }
 
-func PathIsLeaf(path string) bool {
+func IsLeaf(path string) bool {
 	info, err := os.Stat(path)
 
 	if err != nil {
@@ -42,22 +51,22 @@ func PathIsLeaf(path string) bool {
 	return !info.IsDir()
 }
 
-func PathIsParam(path string) bool {
+func IsParameter(path string) bool {
     return strings.ContainsAny(filepath.Base(path), "(){}[]")
 }
 
-func PathIsDir(path string) bool {
-    return !PathIsLeaf(path) 
+func IsModule(path string) bool {
+    return !IsLeaf(path) 
 }
 
-func PathIsRoot(path string) bool {
-    return PathExists(filepath.Join(path, ".clide"))
+func IsRoot(path string) bool {
+    return Exists(filepath.Join(path, ".clide"))
 }
 
 
 func findRoot(path string) (string, error) {
-	if PathExists(filepath.Join(path, ".git")) {
-		if PathExists(filepath.Join(path, ".clide")) {
+	if Exists(filepath.Join(path, ".git")) {
+		if Exists(filepath.Join(path, ".clide")) {
 			return filepath.Join(path, ".clide"), nil
 		}
 
