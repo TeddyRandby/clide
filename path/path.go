@@ -12,7 +12,7 @@ func PathExists(filename string) bool {
 	return !os.IsNotExist(err)
 }
 
-func pathChildren(path string) ([]string, error) {
+func PathChildren(path string) ([]string, error) {
 	files, err := os.ReadDir(path)
 
 	if err != nil {
@@ -22,10 +22,14 @@ func pathChildren(path string) ([]string, error) {
 	var children []string
 
 	for _, child := range files {
-		children = append(children, child.Name())
+		children = append(children, filepath.Join(path, child.Name()))
 	}
 
 	return children, nil
+}
+
+func PathParent(path string) string {
+    return filepath.Join(path, "..")
 }
 
 func PathIsLeaf(path string) bool {
@@ -39,51 +43,17 @@ func PathIsLeaf(path string) bool {
 }
 
 func PathIsParam(path string) bool {
-    return strings.ContainsAny(path, "(){}[]")
+    return strings.ContainsAny(filepath.Base(path), "(){}[]")
 }
 
 func PathIsDir(path string) bool {
     return !PathIsLeaf(path) 
 }
 
-const (
-	NodeTypeCommand  = "Command"
-	NodeTypeModule   = "Module"
-	NodeTypeParameter = "Parameter"
-)
-
-type CommandNode struct {
-	Name string
-	Type string
-    children []CommandNode
+func PathIsRoot(path string) bool {
+    return PathExists(filepath.Join(path, ".clide"))
 }
 
-func (n CommandNode) Title() string       { return n.Name }
-func (n CommandNode) Description() string { return n.Type }
-func (n CommandNode) FilterValue() string { return n.Name }
-
-func PathChoices(path string) ([]CommandNode, error) {
-	children, err := pathChildren(path)
-
-	if err != nil {
-		return nil, err
-	}
-
-	var nodes []CommandNode
-	for _, child := range children {
-		if !strings.HasPrefix(child, ".") {
-			if PathIsLeaf(filepath.Join(path, child)) {
-				nodes = append(nodes, CommandNode{Name: child, Type: NodeTypeCommand})
-			} else if PathIsParam(filepath.Join(path, child)) {
-				nodes = append(nodes, CommandNode{Name: child, Type: NodeTypeParameter})
-			} else {
-				nodes = append(nodes, CommandNode{Name: child, Type: NodeTypeModule})
-			}
-		}
-	}
-
-	return nodes, nil
-}
 
 func findRoot(path string) (string, error) {
 	if PathExists(filepath.Join(path, ".git")) {
