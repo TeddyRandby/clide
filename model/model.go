@@ -15,7 +15,7 @@ const (
 	ClideStateStart        = 0
 	ClideStatePathSelect   = 1
 	ClideStatePromptSelect = 2
-	ClideStatePromptInput   = 3
+	ClideStatePromptInput  = 3
 	ClideStateDone         = 4
 	ClideStateError        = 5
 )
@@ -33,6 +33,7 @@ type Clide struct {
 	root      *node.CommandNode
 	params    []node.CommandNodeParameters
 	param     int
+	args      *map[string]string
 }
 
 func (m Clide) Init() tea.Cmd {
@@ -50,12 +51,12 @@ func (m Clide) View() string {
 		m.list.Title = "Continue"
 		return m.list.View()
 
-    case ClideStatePromptSelect:
+	case ClideStatePromptSelect:
 		m.list.Title = m.params[m.param].Name
-        return m.list.View()
+		return m.list.View()
 
 	case ClideStatePromptInput:
-        return m.textinput.View()
+		return m.textinput.View()
 
 	case ClideStateError:
 		return fmt.Errorf("Clide Error: %s.\n\nPress any key to exit.", m.error).Error()
@@ -67,7 +68,7 @@ func (m Clide) View() string {
 	return "Internal Error: Unknown state"
 }
 
-func New() Clide {
+func New(args *map[string]string) Clide {
 	root, err := node.Root()
 
 	if err != nil {
@@ -81,13 +82,12 @@ func New() Clide {
 	return Clide{
 		root: root,
 		node: root,
-	}
+		args: args,
+	}.PromptPath(root)
 }
 
 func (m Clide) Run() {
-	c := m.PromptPath(m.node)
-
-	p := tea.NewProgram(c)
+	p := tea.NewProgram(m)
 
 	// Run returns the model as a tea.Model.
 	_, err := p.Run()

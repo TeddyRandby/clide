@@ -34,6 +34,7 @@ func (m Clide) Error(err string) Clide {
 		root:   m.root,
 		params: m.params,
 		param:  m.param,
+		args:   m.args,
 		ready:  true,
 		state:  ClideStateError,
 		error:  err,
@@ -75,8 +76,9 @@ func (m Clide) Done(message string) Clide {
 		height:   m.height,
 		node:     m.node,
 		root:     m.root,
-		params:   m.params,
-		param:    m.param,
+		args:     m.args,
+		params:   nil,
+		param:    0,
 		state:    ClideStateDone,
 		viewport: viewport.New(m.width, m.height),
 	}
@@ -97,7 +99,16 @@ func (m Clide) SetAndPromptNextArgument(value string) Clide {
 }
 
 func (m Clide) nextArgument() Clide {
-	switch m.params[m.param].Type {
+	param := m.params[m.param]
+
+	if m.args != nil {
+        shortcutValue := (*m.args)[param.Shortcut]
+		if shortcutValue != "" {
+			return m.SetAndPromptNextArgument(shortcutValue)
+		}
+	}
+
+	switch param.Type {
 	case node.CommandNodeParamTypeInput:
 		return m.PromptInput()
 	case node.CommandNodeParamTypeSelect:
@@ -134,6 +145,7 @@ func (m Clide) PromptPath(n *node.CommandNode) Clide {
 		root:   m.root,
 		params: m.params,
 		param:  m.param,
+		args:   m.args,
 		state:  ClideStatePathSelect,
 		list:   list.New(items, list.NewDefaultDelegate(), m.width, m.height),
 	}
@@ -145,7 +157,7 @@ type item struct {
 	name, desc string
 }
 
-func (i item) Title() string        { return i.name }
+func (i item) Title() string       { return i.name }
 func (i item) Description() string { return i.desc }
 func (i item) FilterValue() string { return i.name }
 
@@ -168,9 +180,9 @@ func (m Clide) PromptSelect() Clide {
 
 	options := strings.Split(string(output), "\n")
 
-    if len(options) == 0 {
-        return m.Error(fmt.Sprintf("%s yielded no options", name))
-    }
+	if len(options) == 0 {
+		return m.Error(fmt.Sprintf("%s yielded no options", name))
+	}
 
 	items := make([]list.Item, len(options))
 
@@ -187,6 +199,7 @@ func (m Clide) PromptSelect() Clide {
 		root:   m.root,
 		params: m.params,
 		param:  m.param,
+		args:   m.args,
 		state:  ClideStatePromptSelect,
 		list:   list.New(items, list.NewDefaultDelegate(), m.width, m.height),
 	}
@@ -201,6 +214,7 @@ func (m Clide) PromptInput() Clide {
 		root:      m.root,
 		params:    m.params,
 		param:     m.param,
+		args:      m.args,
 		state:     ClideStatePromptInput,
 		textinput: textinput.New(),
 	}

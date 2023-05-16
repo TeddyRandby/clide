@@ -2,11 +2,22 @@ package model
 
 import (
 	"clide/node"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (m Clide) selectPath(index int) Clide {
+func (m Clide) Index(name string) int {
+    for i, child := range m.node.Children {
+        if strings.Contains(child.Name, name) {
+            return i
+        }
+    }
+
+    return -1
+}
+
+func (m Clide) SelectPath(index int) Clide {
 	n := m.node.Children[index]
 
 	switch n.Type {
@@ -47,8 +58,8 @@ func (m Clide) updatePathSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "enter", "l", "space":
-			m := m.selectPath(m.list.Index())
+		case "enter", "l", " ":
+			m := m.SelectPath(m.list.Index())
 			return m, nil
 		case "backspace", "h":
 			return m.Backtrack(), nil
@@ -67,7 +78,7 @@ func (m Clide) updateSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
-		case "enter", "l":
+		case "enter", "l", " ":
 			m := m.SetAndPromptNextArgument(m.list.SelectedItem().FilterValue())
 			return m, nil
 		case "backspace", "h":
