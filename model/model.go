@@ -4,8 +4,12 @@ import (
 	"clide/node"
 	"fmt"
 	"os"
+	"os/exec"
 
+	"github.com/charmbracelet/bubbles/help"
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
+	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -18,7 +22,65 @@ const (
 	ClideStatePromptInput  = 3
 	ClideStateDone         = 4
 	ClideStateError        = 5
+	ClideStateLoading      = 6
 )
+
+type KeyMap struct {
+	Next    key.Binding
+	Prev    key.Binding
+	Root    key.Binding
+	Quit    key.Binding
+	VimNext key.Binding
+	VimPrev key.Binding
+	VimRoot key.Binding
+	VimQuit key.Binding
+}
+
+var DefaultKeyMap = KeyMap{
+	Next: key.NewBinding(
+		key.WithKeys("right", "enter"),
+		key.WithHelp("→/enter", "next"),
+	),
+	Prev: key.NewBinding(
+		key.WithKeys("left", "esc"),
+		key.WithHelp("←/esc", "previous"),
+	),
+	Root: key.NewBinding(
+		key.WithKeys("ctrl+r"),
+		key.WithHelp("ctrl+r", "root"),
+	),
+	Quit: key.NewBinding(
+		key.WithKeys("ctrl+c"),
+		key.WithHelp("ctrl+c", "quit"),
+	),
+	VimNext: key.NewBinding(
+		key.WithKeys("l", " "),
+		key.WithHelp("l", "next"),
+	),
+	VimPrev: key.NewBinding(
+		key.WithKeys("h"),
+		key.WithHelp("h", "previous"),
+	),
+	VimRoot: key.NewBinding(
+		key.WithKeys("r"),
+		key.WithHelp("r", "root"),
+	),
+	VimQuit: key.NewBinding(
+		key.WithKeys("q"),
+		key.WithHelp("q", "quit"),
+	),
+}
+
+func (k KeyMap) ShortHelp() []key.Binding {
+	return []key.Binding{k.Next, k.Prev, k.Root, k.Quit}
+}
+
+func (k KeyMap) FullHelp() [][]key.Binding {
+	return [][]key.Binding{
+		{k.Next, k.Prev, k.Root, k.Quit},
+		{k.VimNext, k.VimPrev},
+	}
+}
 
 type Clide struct {
 	state     int
@@ -26,49 +88,29 @@ type Clide struct {
 	ready     bool
 	width     int
 	height    int
+	help      help.Model
 	textinput textinput.Model
 	viewport  viewport.Model
 	list      list.Model
+	spinner   spinner.Model
 	node      *node.CommandNode
 	root      *node.CommandNode
 	params    []node.CommandNodeParameters
 	param     int
-	args      *map[string]string
+	args      map[string]string
+	keymap    KeyMap
+	cmd       *exec.Cmd
 }
 
 func (m Clide) Init() tea.Cmd {
-	return nil
+	return m.spinner.Tick
 }
 
-func (m Clide) View() string {
-	if !m.ready {
-		return "Initializing..."
-	}
-
-	switch m.state {
-
-	case ClideStatePathSelect:
-		m.list.Title = "Continue"
-		return m.list.View()
-
-	case ClideStatePromptSelect:
-		m.list.Title = m.params[m.param].Name
-		return m.list.View()
-
-	case ClideStatePromptInput:
-		return m.textinput.View()
-
-	case ClideStateError:
-		return fmt.Errorf("Clide Error: %s.\n\nPress any key to exit.", m.error).Error()
-
-	case ClideStateDone:
-		return fmt.Sprintf("Clide Executed: %s\n\n %s", m.node.Path, m.viewport.View())
-	}
-
-	return "Internal Error: Unknown state"
+func (m Clide) Leaves() []node.CommandNode {
+	return m.node.Leaves()
 }
 
-func New(args *map[string]string) Clide {
+func New(args map[string]string) Clide {
 	root, err := node.Root()
 
 	if err != nil {
@@ -76,21 +118,20 @@ func New(args *map[string]string) Clide {
 	}
 
 	if root == nil {
-		return Clide{}.Error("No clide project found.")
+		return Clide{}.Error("No project found")
 	}
 
 	return Clide{
-		root: root,
-		node: root,
-		args: args,
+		root:    root,
+		node:    root,
+		args:    args,
+		keymap:  DefaultKeyMap,
+		help:    help.New(),
 	}.PromptPath(root)
 }
 
 func (m Clide) Run() {
-	p := tea.NewProgram(m)
-
-	// Run returns the model as a tea.Model.
-	_, err := p.Run()
+	_, err := tea.NewProgram(m).Run()
 
 	if err != nil {
 		fmt.Println(err)

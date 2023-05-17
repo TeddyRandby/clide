@@ -12,12 +12,13 @@ import (
 )
 
 const (
-	NodeTypeCommand = "Command"
-	NodeTypeModule  = "Module"
+	NodeTypeCommand = " "
+	NodeTypeModule  = " "
 )
 
 type CommandNode struct {
 	Name     string
+	Shortcut string
 	Path     string
 	Type     string
 	Children []CommandNode
@@ -36,12 +37,23 @@ type CommandNodeParameters struct {
 	Type     string
 }
 
-func (n CommandNode) Title() string       { return fmt.Sprintf("[%s] %s", n.Type, n.Name) }
-func (n CommandNode) Description() string { return n.Path }
+func (n CommandNode) Title() string {
+	if n.Shortcut != "" {
+		return fmt.Sprintf("%s %s (%s)", n.Type, n.Name, n.Shortcut)
+	}
+    return fmt.Sprintf("%s %s", n.Type, n.Name)
+}
+
+func (n CommandNode) Description() string { return n.clideRelativePath() }
+
 func (n CommandNode) FilterValue() string { return n.Path }
 
-func nameAndShortcut(original string) (string, string) {
-	name := strings.ToLower(strings.Trim(original, "[]{}<>"))
+func moduleNameAndShortcut(original string) (string, string) {
+	name := strings.Split(original, ".")[0]
+
+    if name == "" {
+        name = original
+    }
 
 	var shortcut string
 	for _, char := range original {
@@ -50,35 +62,71 @@ func nameAndShortcut(original string) (string, string) {
 		}
 	}
 
-	return name, shortcut
+	return strings.ToLower(name), strings.ToLower(shortcut)
+}
+
+func parameterNameAndShortcut(original string) (string, string) {
+	name := strings.Trim(original, "[]{}<>")
+
+	var shortcut string
+	for _, char := range original {
+		if unicode.IsUpper(char) {
+			shortcut += string(char)
+		}
+	}
+
+	return strings.ToLower(name), strings.ToLower(shortcut)
+}
+
+func (n CommandNode) Leaves() []CommandNode {
+	leaves := make([]CommandNode, 0)
+
+	for _, child := range n.Children {
+		switch child.Type {
+		case NodeTypeCommand:
+			leaves = append(leaves, child)
+		case NodeTypeModule:
+			leaves = append(leaves, child.Leaves()...)
+		}
+	}
+
+	return leaves
+}
+
+func (n CommandNode) clideRelativePath() string {
+    return filepath.Join(n.clideRelativeSteps()...)
+}
+
+func (n CommandNode) clideRelativeSteps() []string {
+	steps := strings.Split(n.Path, "/")
+
+	root := slices.Index(steps, ".clide")
+
+    return steps[root+1:] 
 }
 
 func (n CommandNode) Parameters() []CommandNodeParameters {
 	params := make([]CommandNodeParameters, 0)
 
-	steps := strings.Split(n.Path, "/")
-
-	root := slices.Index(steps, ".clide")
-
-	steps = steps[root+1:]
+    steps := n.clideRelativeSteps()
 
 	for _, step := range steps {
 		if strings.Contains(step, "[") {
-			name, shortcut := nameAndShortcut(step)
+			name, shortcut := parameterNameAndShortcut(step)
 			params = append(params, CommandNodeParameters{
 				Name:     name,
 				Shortcut: shortcut,
 				Type:     CommandNodeParamTypeInput,
 			})
 		} else if strings.Contains(step, "{") {
-			name, shortcut := nameAndShortcut(step)
+			name, shortcut := parameterNameAndShortcut(step)
 			params = append(params, CommandNodeParameters{
 				Name:     name,
 				Shortcut: shortcut,
 				Type:     CommandNodeParamTypeSelect,
 			})
 		} else if strings.Contains(step, "<") {
-			name, shortcut := nameAndShortcut(step)
+			name, shortcut := parameterNameAndShortcut(step)
 			params = append(params, CommandNodeParameters{
 				Name:     name,
 				Shortcut: shortcut,
@@ -111,9 +159,9 @@ func Root() (*CommandNode, error) {
 }
 
 func New(parent *CommandNode, pth string) (*CommandNode, error) {
-	name := filepath.Base(pth)
+	original_name := filepath.Base(pth)
 
-	if strings.HasPrefix(name, ".") && name != ".clide" {
+	if strings.HasPrefix(original_name, ".") && original_name != ".clide" {
 		return nil, nil
 	}
 
@@ -121,9 +169,12 @@ func New(parent *CommandNode, pth string) (*CommandNode, error) {
 		return nil, errors.New("A leaf cannot require a parameter")
 	}
 
+	name, shortcut := moduleNameAndShortcut(original_name)
+
 	node := new(CommandNode)
 	node.Parent = parent
 	node.Name = name
+	node.Shortcut = shortcut
 	node.Path = pth
 
 	if path.IsLeaf(pth) {

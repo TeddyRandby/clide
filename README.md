@@ -8,4 +8,7 @@ Clide is the Command Line Interface for Developer Experience!
 
 ## Why Clide?
 - Organization - The convenience of file based routing .. for the CLI!
-- Discoverability - Navigate through your scripts with ease!
+- Discoverability - Navigate and search through your scripts with ease!
+
+# Examples
+

@@ -35,6 +35,8 @@ func (m Clide) Error(err string) Clide {
 		params: m.params,
 		param:  m.param,
 		args:   m.args,
+		keymap: m.keymap,
+		help:   m.help,
 		ready:  true,
 		state:  ClideStateError,
 		error:  err,
@@ -45,7 +47,7 @@ func (m Clide) Command(n *node.CommandNode) Clide {
 	m.node = n
 
 	if n.Type != node.NodeTypeCommand {
-		return m.Error("Cannot execute a module")
+		return m.Error("Can only execute commands")
 	}
 
 	m.params = n.Parameters()
@@ -77,6 +79,8 @@ func (m Clide) Done(message string) Clide {
 		node:     m.node,
 		root:     m.root,
 		args:     m.args,
+		keymap:   m.keymap,
+		help:     m.help,
 		params:   nil,
 		param:    0,
 		state:    ClideStateDone,
@@ -101,11 +105,9 @@ func (m Clide) SetAndPromptNextArgument(value string) Clide {
 func (m Clide) nextArgument() Clide {
 	param := m.params[m.param]
 
-	if m.args != nil {
-        shortcutValue := (*m.args)[param.Shortcut]
-		if shortcutValue != "" {
-			return m.SetAndPromptNextArgument(shortcutValue)
-		}
+	shortcutValue := m.args[param.Shortcut]
+	if shortcutValue != "" {
+		return m.SetAndPromptNextArgument(shortcutValue)
 	}
 
 	switch param.Type {
@@ -146,6 +148,8 @@ func (m Clide) PromptPath(n *node.CommandNode) Clide {
 		params: m.params,
 		param:  m.param,
 		args:   m.args,
+		keymap: m.keymap,
+		help:   m.help,
 		state:  ClideStatePathSelect,
 		list:   list.New(items, list.NewDefaultDelegate(), m.width, m.height),
 	}
@@ -200,6 +204,8 @@ func (m Clide) PromptSelect() Clide {
 		params: m.params,
 		param:  m.param,
 		args:   m.args,
+		keymap: m.keymap,
+		help:   m.help,
 		state:  ClideStatePromptSelect,
 		list:   list.New(items, list.NewDefaultDelegate(), m.width, m.height),
 	}
@@ -215,6 +221,8 @@ func (m Clide) PromptInput() Clide {
 		params:    m.params,
 		param:     m.param,
 		args:      m.args,
+		keymap:    m.keymap,
+		help:      m.help,
 		state:     ClideStatePromptInput,
 		textinput: textinput.New(),
 	}

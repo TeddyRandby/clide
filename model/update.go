@@ -4,17 +4,22 @@ import (
 	"clide/node"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func (m Clide) Index(name string) int {
-    for i, child := range m.node.Children {
-        if strings.Contains(child.Name, name) {
-            return i
-        }
-    }
+	for i, child := range m.node.Children {
+		if child.Shortcut != "" && child.Shortcut == name {
+			return i
+		}
 
-    return -1
+		if strings.HasPrefix(child.Name, name) {
+			return i
+		}
+	}
+
+	return -1
 }
 
 func (m Clide) SelectPath(index int) Clide {
@@ -33,16 +38,17 @@ func (m Clide) SelectPath(index int) Clide {
 
 func (m Clide) updateInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
-	case tea.WindowSizeMsg:
-		m.textinput.Width = m.width
-
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "enter":
+		switch {
+		case key.Matches(msg, m.keymap.Next):
 			value := m.textinput.Value()
 			return m.SetAndPromptNextArgument(value), nil
-		case "esc":
+		case key.Matches(msg, m.keymap.Prev):
 			return m.Backtrack(), nil
+		case key.Matches(msg, m.keymap.Quit):
+			return m, tea.Quit
+		case key.Matches(msg, m.keymap.Root):
+			return m.Root(), nil
 		}
 	}
 
@@ -53,15 +59,35 @@ func (m Clide) updateInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Clide) updatePathSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
-	m.list.SetSize(m.width, m.height)
-
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "enter", "l", " ":
-			m := m.SelectPath(m.list.Index())
-			return m, nil
-		case "backspace", "h":
+		switch {
+		case key.Matches(msg, m.keymap.VimQuit):
+			if !m.list.SettingFilter() {
+				return m, tea.Quit
+			}
+		case key.Matches(msg, m.keymap.Quit):
+			return m, tea.Quit
+
+		case key.Matches(msg, m.keymap.VimRoot):
+			if !m.list.SettingFilter() {
+				return m.Root(), nil
+			}
+		case key.Matches(msg, m.keymap.Root):
+			return m.Root(), nil
+
+		case key.Matches(msg, m.keymap.VimNext):
+			if !m.list.SettingFilter() {
+				return m.SelectPath(m.list.Index()), nil
+			}
+		case key.Matches(msg, m.keymap.Next):
+			return m.SelectPath(m.list.Index()), nil
+
+		case key.Matches(msg, m.keymap.VimPrev):
+			if !m.list.SettingFilter() {
+				return m.Backtrack(), nil
+			}
+		case key.Matches(msg, m.keymap.Prev):
 			return m.Backtrack(), nil
 		}
 	}
@@ -73,16 +99,37 @@ func (m Clide) updatePathSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Clide) updateSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
-	m.list.SetSize(m.width, m.height)
-
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "enter", "l", " ":
-			m := m.SetAndPromptNextArgument(m.list.SelectedItem().FilterValue())
-			return m, nil
-		case "backspace", "h":
+		switch {
+		case key.Matches(msg, m.keymap.VimQuit):
+			if !m.list.SettingFilter() {
+				return m, tea.Quit
+			}
+		case key.Matches(msg, m.keymap.Quit):
+			return m, tea.Quit
+
+		case key.Matches(msg, m.keymap.VimRoot):
+			if !m.list.SettingFilter() {
+				return m.Root(), nil
+			}
+		case key.Matches(msg, m.keymap.Root):
+			return m.Root(), nil
+
+		case key.Matches(msg, m.keymap.VimNext):
+			if !m.list.SettingFilter() {
+				return m.SetAndPromptNextArgument(m.list.SelectedItem().FilterValue()), nil
+			}
+		case key.Matches(msg, m.keymap.Next):
+			return m.SetAndPromptNextArgument(m.list.SelectedItem().FilterValue()), nil
+
+		case key.Matches(msg, m.keymap.VimPrev):
+			if !m.list.SettingFilter() {
+				return m.Backtrack(), nil
+			}
+		case key.Matches(msg, m.keymap.Prev):
 			return m.Backtrack(), nil
+
 		}
 	}
 
@@ -94,16 +141,23 @@ func (m Clide) updateSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Clide) updateDone(msg tea.Msg) (tea.Model, tea.Cmd) {
-	m.viewport.Width = m.width
-	m.viewport.Height = m.height
-
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c", "q", "esc":
+		switch {
+		case key.Matches(msg, m.keymap.VimQuit):
+			fallthrough
+		case key.Matches(msg, m.keymap.Quit):
 			return m, tea.Quit
-		case "r":
+
+		case key.Matches(msg, m.keymap.VimRoot):
+			fallthrough
+		case key.Matches(msg, m.keymap.Root):
 			return m.Root(), nil
+
+		case key.Matches(msg, m.keymap.VimPrev):
+			fallthrough
+		case key.Matches(msg, m.keymap.Prev):
+			return m.Backtrack(), nil
 		}
 
 	}
