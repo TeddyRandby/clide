@@ -151,13 +151,14 @@ func New(args map[string]string) Clide {
 func (m Clide) Run() {
 	if m.state == ClideStateDone {
 		syscall.Exec(m.node.Path, []string{m.node.Name}, os.Environ())
+        return
 	}
 
 	c, err := tea.NewProgram(m).Run()
 
 	if err != nil {
 		fmt.Println(err)
-		os.Exit(1)
+        return
 	}
 
 	m = c.(Clide)
