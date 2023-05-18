@@ -105,17 +105,25 @@ func (m Clide) Leaves() []node.CommandNode {
 	return m.node.Leaves()
 }
 
+func (m Clide) Ok() bool {
+    return m.state != ClideStateError
+}
+
+func (m Clide) Err() string {
+    return m.error
+}
+
 func New(args map[string]string) Clide {
 	root, err := node.Root()
 
 	if err != nil {
-		m, _ := Clide{}.Error(err.Error())
-		return m.(Clide)
+        m, _ := Clide{}.Error(err.Error())
+        return m
 	}
 
 	if root == nil {
 		m, _ := Clide{}.Error("No project found")
-		return m.(Clide)
+		return m
 	}
 
 	m, _ := Clide{
@@ -126,7 +134,7 @@ func New(args map[string]string) Clide {
 		help:   help.New(),
 	}.PromptPath(root)
 
-	return m.(Clide)
+	return m
 }
 
 func (m Clide) Run() {

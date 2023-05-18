@@ -13,7 +13,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (m Clide) Backtrack() (tea.Model, tea.Cmd) {
+func (m Clide) Backtrack() (Clide, tea.Cmd) {
 	parent := m.node.Parent
 
 	if parent == nil {
@@ -23,15 +23,16 @@ func (m Clide) Backtrack() (tea.Model, tea.Cmd) {
 	return m.PromptPath(parent)
 }
 
-func (m Clide) Root() (tea.Model, tea.Cmd) {
+func (m Clide) Root() (Clide, tea.Cmd) {
 	return m.PromptPath(m.root)
 }
 
-func (m Clide) Error(err string) (tea.Model, tea.Cmd) {
+func (m Clide) Error(err string) (Clide, tea.Cmd) {
 	return Clide{
 		width:  m.width,
 		height: m.height,
 		root:   m.root,
+        node:   m.node,
 		params: m.params,
 		param:  m.param,
 		args:   m.args,
@@ -43,7 +44,7 @@ func (m Clide) Error(err string) (tea.Model, tea.Cmd) {
 	}, nil
 }
 
-func (m Clide) Command(n *node.CommandNode) (tea.Model, tea.Cmd) {
+func (m Clide) Command(n *node.CommandNode) (Clide, tea.Cmd) {
 	m.node = n
 
 	if n.Type != node.NodeTypeCommand {
@@ -59,7 +60,7 @@ func (m Clide) Command(n *node.CommandNode) (tea.Model, tea.Cmd) {
     return m.Done()
 }
 
-func (m Clide) Done() (tea.Model, tea.Cmd) {
+func (m Clide) Done() (Clide, tea.Cmd) {
 	clide := Clide{
 		ready:    m.ready,
 		width:    m.width,
@@ -76,7 +77,7 @@ func (m Clide) Done() (tea.Model, tea.Cmd) {
 	return clide, tea.Quit
 }
 
-func (m Clide) SetAndPromptNextArgument(value string) (tea.Model, tea.Cmd) {
+func (m Clide) SetAndPromptNextArgument(value string) (Clide, tea.Cmd) {
 	os.Setenv(m.params[m.param].Name, value)
 	m.param++
 
@@ -87,7 +88,7 @@ func (m Clide) SetAndPromptNextArgument(value string) (tea.Model, tea.Cmd) {
 	return m.Done()
 }
 
-func (m Clide) nextParameter() (tea.Model, tea.Cmd) {
+func (m Clide) nextParameter() (Clide, tea.Cmd) {
 	param := m.params[m.param]
 
 	shortcutValue := m.args[param.Shortcut]
@@ -105,7 +106,7 @@ func (m Clide) nextParameter() (tea.Model, tea.Cmd) {
 	return m.Error("Invalid parameter type")
 }
 
-func (m Clide) PromptPath(n *node.CommandNode) (tea.Model, tea.Cmd) {
+func (m Clide) PromptPath(n *node.CommandNode) (Clide, tea.Cmd) {
 	m.node = n
 
 	if m.node == nil {
@@ -150,7 +151,7 @@ func (i item) Title() string       { return i.name }
 func (i item) Description() string { return i.desc }
 func (i item) FilterValue() string { return i.name }
 
-func (m Clide) PromptSelect() (tea.Model, tea.Cmd) {
+func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 	name := m.params[m.param].Name
 
 	sibling := path.HasSibling(m.node.Path, name)
@@ -196,7 +197,7 @@ func (m Clide) PromptSelect() (tea.Model, tea.Cmd) {
 	}, nil
 }
 
-func (m Clide) PromptInput() (tea.Model, tea.Cmd) {
+func (m Clide) PromptInput() (Clide, tea.Cmd) {
 	c := Clide{
 		ready:     m.ready,
 		width:     m.width,

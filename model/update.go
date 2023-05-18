@@ -22,7 +22,7 @@ func (m Clide) Index(name string) int {
 	return -1
 }
 
-func (m Clide) SelectPath(index int) (tea.Model, tea.Cmd) {
+func (m Clide) SelectPath(index int) (Clide, tea.Cmd) {
 	n := m.node.Children[index]
 
 	switch n.Type {
@@ -36,7 +36,7 @@ func (m Clide) SelectPath(index int) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Clide) updateInput(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Clide) updateInput(msg tea.Msg) (Clide, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
@@ -58,7 +58,7 @@ func (m Clide) updateInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m Clide) updatePathSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Clide) updatePathSelect(msg tea.Msg) (Clide, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {
@@ -98,7 +98,7 @@ func (m Clide) updatePathSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m Clide) updateSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Clide) updateSelect(msg tea.Msg) (Clide, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch {

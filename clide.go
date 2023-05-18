@@ -15,16 +15,23 @@ func main() {
 		// Process the args as builtins, don't run
 		switch args[1] {
 		case "ls":
-			leaves := New(nil).Leaves()
+			c := New(nil)
+
+            if !c.Ok() {
+                c.Run()
+                return
+            }
+
+            leaves := c.Leaves()
 
 			for _, leaf := range leaves {
 				fmt.Printf("%s %s\n", leaf.Title(), leaf.Description())
 			}
 
-			os.Exit(0)
+            return
 		default:
             m, _ := Clide{}.Error(fmt.Sprintf("Unknown builtin command '%s'", args[1]))
-            m.(Clide).Run()
+            m.Run()
 			return
 		}
 	}
@@ -38,7 +45,7 @@ func main() {
 
 			if len(split) == 1 {
                 m, _ := Clide{}.Error(fmt.Sprintf("Parameter '%s' has no value", arg))
-                m.(Clide).Run()
+                m.Run()
 				return
 			}
 
@@ -50,17 +57,21 @@ func main() {
 
 	clide := New(params)
 
+    if !clide.Ok() {
+        clide.Run()
+        return
+    }
+
 	for _, step := range steps {
 		i := clide.Index(step)
 
 		if i == -1 {
             m, _ := Clide{}.Error(fmt.Sprintf("Unknown command '%s'", step))
-            m.(Clide).Run()
+            m.Run()
 			return
 		}
 
-        m, _ := clide.SelectPath(i)
-        clide = m.(Clide)
+        clide, _ = clide.SelectPath(i)
 	}
 
 	clide.Run()

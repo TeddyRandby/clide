@@ -86,6 +86,10 @@ func (m Clide) headerView() string {
 
 	node := m.node
 
+    if node == nil {
+        return ""
+    }
+
 	for node.Parent != nil {
 		renderedSteps = append(renderedSteps, sepStyle.Render("/"), stepStyle.Render(node.Name))
 		node = node.Parent

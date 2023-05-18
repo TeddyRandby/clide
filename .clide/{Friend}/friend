@@ -1,3 +1,0 @@
-#! /usr/bin/env sh
-
-printf "Alice:A friend\nBob:Another Friend"

@@ -14,6 +14,7 @@ func Exists(filename string) bool {
 
 func HasSibling(path string, child string) string {
     sibling := filepath.Join(path, "..", child)
+
     if Exists(sibling) {
         return sibling
     }
