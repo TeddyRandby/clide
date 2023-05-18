@@ -32,8 +32,8 @@ var (
 	promptStyle = func() lipgloss.Style {
 		return lipgloss.
 			NewStyle().
-			Background(purple).
 			Foreground(bg).
+			Background(purple).
 			Margin(1, 1, 0).
 			Padding(0, 1)
 	}()
@@ -42,7 +42,6 @@ var (
 			NewStyle().
 			ColorWhitespace(false).
 			Foreground(white).
-			Background(bg).
 			Margin(0, 1).
 			Padding(0, 1)
 	}()
@@ -55,7 +54,6 @@ var (
         return lipgloss.
             NewStyle().
             Foreground(white).
-            Background(bg).
             Padding(0, 1)
     }()
     errorStyle= func() lipgloss.Style {
