@@ -72,6 +72,7 @@ func (m Clide) Done() (Clide, tea.Cmd) {
 		help:     m.help,
 		params:   nil,
 		param:    0,
+        state:    ClideStateDone,
 	}
 
 	return clide, tea.Quit
@@ -165,7 +166,7 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 	output, err := cmd.Output()
 
 	if err != nil {
-		return m.Error(err.Error())
+		return m.Error("Could not execute command")
 	}
 
 	options := strings.Split(string(output), "\n")
@@ -215,7 +216,9 @@ func (m Clide) PromptInput() (Clide, tea.Cmd) {
 
 	c.textinput.Width = m.width
 	c.textinput.CharLimit = 50
-	c.textinput.Placeholder = "Enter a value"
+	c.textinput.Placeholder = "..."
+    c.textinput.Prompt = ""
+    c.textinput.PromptStyle.BorderBottom(true)
 
 	c.textinput.Focus()
 

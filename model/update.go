@@ -98,6 +98,30 @@ func (m Clide) updatePathSelect(msg tea.Msg) (Clide, tea.Cmd) {
 	return m, cmd
 }
 
+func (m Clide) updateError(msg tea.Msg) (Clide, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, m.keymap.VimQuit):
+            fallthrough
+		case key.Matches(msg, m.keymap.Quit):
+			return m, tea.Quit
+
+		case key.Matches(msg, m.keymap.VimRoot):
+            fallthrough
+		case key.Matches(msg, m.keymap.Root):
+			return m.Root()
+
+		case key.Matches(msg, m.keymap.VimPrev):
+            fallthrough
+		case key.Matches(msg, m.keymap.Prev):
+			return m.Backtrack()
+		}
+	}
+
+	return m, nil
+}
+
 func (m Clide) updateSelect(msg tea.Msg) (Clide, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -151,7 +175,7 @@ func (m Clide) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch m.state {
 
 	case ClideStateError:
-		return m, tea.Quit
+		return m.updateError(msg)
 
 	case ClideStatePathSelect:
 		return m.updatePathSelect(msg)

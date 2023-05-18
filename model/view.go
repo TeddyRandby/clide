@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -33,17 +34,7 @@ var (
 			NewStyle().
 			Background(purple).
 			Foreground(bg).
-			Margin(0, 1).
-			Padding(0, 1)
-	}()
-	titleStyle = func() lipgloss.Style {
-		b := lipgloss.RoundedBorder()
-		b.Right = "├"
-		return lipgloss.
-			NewStyle().
-			BorderStyle(b).
-			Background(bg).
-			Foreground(purple).
+			Margin(1, 1, 0).
 			Padding(0, 1)
 	}()
 	stepStyle = func() lipgloss.Style {
@@ -67,9 +58,10 @@ var (
             Background(bg).
             Padding(0, 1)
     }()
-    doneStyle = func() lipgloss.Style {
+    errorStyle= func() lipgloss.Style {
         return lipgloss.
             NewStyle().
+            Foreground(red).
             Padding(1, 1).
             Margin(0, 1)
     }()
@@ -138,10 +130,16 @@ func (m Clide) View() string {
 	case ClideStatePromptInput:
 		m.textinput.Width = m.width
 		header := promptStyle.Render(m.params[m.param].Name)
-		return fmt.Sprintf("%s\n%s\n %s", headerView, header, m.textinput.View())
+
+        inputView := m.textinput.View()
+
+        lines := m.height - verticalSpace - 1
+        blank := strings.Repeat("\n", max(0, lines - lipgloss.Height(inputView)))
+		return fmt.Sprintf("%s\n%s%s\n%s%s", headerView, header, inputView, blank, helpView)
 
 	case ClideStateError:
-		return fmt.Errorf("Clide Error: %s.\n\nPress any key to exit.", m.error).Error()
+        content := errorStyle.Copy().Height(m.height - verticalSpace).Render(fmt.Sprintf("Clide Error: %s.\n\n", m.error))
+		return fmt.Sprintf("%s\n%s\n%s", headerView, content, helpView)
 	}
 
 	return "Internal Error: Unknown state"

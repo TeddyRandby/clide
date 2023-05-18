@@ -44,7 +44,7 @@ func main() {
 			split := strings.Split(arg, "=")
 
 			if len(split) == 1 {
-                m, _ := Clide{}.Error(fmt.Sprintf("Parameter '%s' has no value", arg))
+                m, _ := Clide{}.Error(fmt.Sprintf("Argument '%s' has no value", arg))
                 m.Run()
 				return
 			}

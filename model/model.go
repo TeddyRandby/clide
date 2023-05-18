@@ -20,6 +20,7 @@ const (
 	ClideStatePromptSelect = 2
 	ClideStatePromptInput  = 3
 	ClideStateError        = 5
+    ClideStateDone         = 6
 )
 
 type KeyMap struct {
@@ -117,7 +118,7 @@ func New(args map[string]string) Clide {
 	root, err := node.Root()
 
 	if err != nil {
-        m, _ := Clide{}.Error(err.Error())
+        m, _ := Clide{}.Error("Invalid project")
         return m
 	}
 
@@ -147,7 +148,7 @@ func (m Clide) Run() {
 
 	m = c.(Clide)
 
-	if m.state != ClideStateError {
+	if m.state == ClideStateDone {
 		syscall.Exec(m.node.Path, []string{m.node.Name}, os.Environ())
 	}
 }
