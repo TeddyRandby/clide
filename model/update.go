@@ -22,7 +22,7 @@ func (m Clide) Index(name string) int {
 	return -1
 }
 
-func (m Clide) SelectPath(index int) Clide {
+func (m Clide) SelectPath(index int) (tea.Model, tea.Cmd) {
 	n := m.node.Children[index]
 
 	switch n.Type {
@@ -33,7 +33,7 @@ func (m Clide) SelectPath(index int) Clide {
 		return m.PromptPath(&n)
 	}
 
-	return m
+	return m, nil
 }
 
 func (m Clide) updateInput(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -42,13 +42,13 @@ func (m Clide) updateInput(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch {
 		case key.Matches(msg, m.keymap.Next):
 			value := m.textinput.Value()
-			return m.SetAndPromptNextArgument(value), nil
+			return m.SetAndPromptNextArgument(value)
 		case key.Matches(msg, m.keymap.Prev):
-			return m.Backtrack(), nil
+			return m.Backtrack()
 		case key.Matches(msg, m.keymap.Quit):
 			return m, tea.Quit
 		case key.Matches(msg, m.keymap.Root):
-			return m.Root(), nil
+			return m.Root()
 		}
 	}
 
@@ -71,24 +71,24 @@ func (m Clide) updatePathSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, m.keymap.VimRoot):
 			if !m.list.SettingFilter() {
-				return m.Root(), nil
+				return m.Root()
 			}
 		case key.Matches(msg, m.keymap.Root):
-			return m.Root(), nil
+			return m.Root()
 
 		case key.Matches(msg, m.keymap.VimNext):
 			if !m.list.SettingFilter() {
-				return m.SelectPath(m.list.Index()), nil
+				return m.SelectPath(m.list.Index())
 			}
 		case key.Matches(msg, m.keymap.Next):
-			return m.SelectPath(m.list.Index()), nil
+			return m.SelectPath(m.list.Index())
 
 		case key.Matches(msg, m.keymap.VimPrev):
 			if !m.list.SettingFilter() {
-				return m.Backtrack(), nil
+				return m.Backtrack()
 			}
 		case key.Matches(msg, m.keymap.Prev):
-			return m.Backtrack(), nil
+			return m.Backtrack()
 		}
 	}
 
@@ -111,24 +111,24 @@ func (m Clide) updateSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		case key.Matches(msg, m.keymap.VimRoot):
 			if !m.list.SettingFilter() {
-				return m.Root(), nil
+				return m.Root()
 			}
 		case key.Matches(msg, m.keymap.Root):
-			return m.Root(), nil
+			return m.Root()
 
 		case key.Matches(msg, m.keymap.VimNext):
 			if !m.list.SettingFilter() {
-				return m.SetAndPromptNextArgument(m.list.SelectedItem().FilterValue()), nil
+				return m.SetAndPromptNextArgument(m.list.SelectedItem().FilterValue())
 			}
 		case key.Matches(msg, m.keymap.Next):
-			return m.SetAndPromptNextArgument(m.list.SelectedItem().FilterValue()), nil
+			return m.SetAndPromptNextArgument(m.list.SelectedItem().FilterValue())
 
 		case key.Matches(msg, m.keymap.VimPrev):
 			if !m.list.SettingFilter() {
-				return m.Backtrack(), nil
+				return m.Backtrack()
 			}
 		case key.Matches(msg, m.keymap.Prev):
-			return m.Backtrack(), nil
+			return m.Backtrack()
 
 		}
 	}
@@ -138,34 +138,6 @@ func (m Clide) updateSelect(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	return m, cmd
 
-}
-
-func (m Clide) updateDone(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, m.keymap.VimQuit):
-			fallthrough
-		case key.Matches(msg, m.keymap.Quit):
-			return m, tea.Quit
-
-		case key.Matches(msg, m.keymap.VimRoot):
-			fallthrough
-		case key.Matches(msg, m.keymap.Root):
-			return m.Root(), nil
-
-		case key.Matches(msg, m.keymap.VimPrev):
-			fallthrough
-		case key.Matches(msg, m.keymap.Prev):
-			return m.Backtrack(), nil
-		}
-
-	}
-
-	var cmd tea.Cmd
-	m.viewport, cmd = m.viewport.Update(msg)
-
-	return m, cmd
 }
 
 func (m Clide) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -180,9 +152,6 @@ func (m Clide) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case ClideStateError:
 		return m, tea.Quit
-
-	case ClideStateDone:
-		return m.updateDone(msg)
 
 	case ClideStatePathSelect:
 		return m.updatePathSelect(msg)

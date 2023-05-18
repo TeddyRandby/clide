@@ -10,24 +10,24 @@ import (
 
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
-	"github.com/charmbracelet/bubbles/viewport"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (m Clide) Backtrack() Clide {
+func (m Clide) Backtrack() (tea.Model, tea.Cmd) {
 	parent := m.node.Parent
 
 	if parent == nil {
-		return m
+		return m, nil
 	}
 
 	return m.PromptPath(parent)
 }
 
-func (m Clide) Root() Clide {
+func (m Clide) Root() (tea.Model, tea.Cmd) {
 	return m.PromptPath(m.root)
 }
 
-func (m Clide) Error(err string) Clide {
+func (m Clide) Error(err string) (tea.Model, tea.Cmd) {
 	return Clide{
 		width:  m.width,
 		height: m.height,
@@ -40,10 +40,10 @@ func (m Clide) Error(err string) Clide {
 		ready:  true,
 		state:  ClideStateError,
 		error:  err,
-	}
+	}, nil
 }
 
-func (m Clide) Command(n *node.CommandNode) Clide {
+func (m Clide) Command(n *node.CommandNode) (tea.Model, tea.Cmd) {
 	m.node = n
 
 	if n.Type != node.NodeTypeCommand {
@@ -53,25 +53,13 @@ func (m Clide) Command(n *node.CommandNode) Clide {
 	m.params = n.Parameters()
 
 	if len(m.params) > m.param {
-		return m.nextArgument()
+		return m.nextParameter()
 	}
 
-	return m.execute()
+    return m.Done()
 }
 
-func (m Clide) execute() Clide {
-	cmd := exec.Command(m.node.Path)
-
-	output, err := cmd.Output()
-
-	if err != nil {
-		return m.Error(err.Error())
-	}
-
-	return m.Done(string(output))
-}
-
-func (m Clide) Done(message string) Clide {
+func (m Clide) Done() (tea.Model, tea.Cmd) {
 	clide := Clide{
 		ready:    m.ready,
 		width:    m.width,
@@ -83,26 +71,23 @@ func (m Clide) Done(message string) Clide {
 		help:     m.help,
 		params:   nil,
 		param:    0,
-		state:    ClideStateDone,
-		viewport: viewport.New(m.width, m.height),
 	}
 
-	clide.viewport.SetContent(message)
-	return clide
+	return clide, tea.Quit
 }
 
-func (m Clide) SetAndPromptNextArgument(value string) Clide {
+func (m Clide) SetAndPromptNextArgument(value string) (tea.Model, tea.Cmd) {
 	os.Setenv(m.params[m.param].Name, value)
 	m.param++
 
 	if len(m.params) > m.param {
-		return m.nextArgument()
+		return m.nextParameter()
 	}
 
-	return m.execute()
+	return m.Done()
 }
 
-func (m Clide) nextArgument() Clide {
+func (m Clide) nextParameter() (tea.Model, tea.Cmd) {
 	param := m.params[m.param]
 
 	shortcutValue := m.args[param.Shortcut]
@@ -120,7 +105,7 @@ func (m Clide) nextArgument() Clide {
 	return m.Error("Invalid parameter type")
 }
 
-func (m Clide) PromptPath(n *node.CommandNode) Clide {
+func (m Clide) PromptPath(n *node.CommandNode) (tea.Model, tea.Cmd) {
 	m.node = n
 
 	if m.node == nil {
@@ -154,7 +139,7 @@ func (m Clide) PromptPath(n *node.CommandNode) Clide {
 		list:   list.New(items, list.NewDefaultDelegate(), m.width, m.height),
 	}
 
-	return c
+	return c, nil
 }
 
 type item struct {
@@ -165,7 +150,7 @@ func (i item) Title() string       { return i.name }
 func (i item) Description() string { return i.desc }
 func (i item) FilterValue() string { return i.name }
 
-func (m Clide) PromptSelect() Clide {
+func (m Clide) PromptSelect() (tea.Model, tea.Cmd) {
 	name := m.params[m.param].Name
 
 	sibling := path.HasSibling(m.node.Path, name)
@@ -208,10 +193,10 @@ func (m Clide) PromptSelect() Clide {
 		help:   m.help,
 		state:  ClideStatePromptSelect,
 		list:   list.New(items, list.NewDefaultDelegate(), m.width, m.height),
-	}
+	}, nil
 }
 
-func (m Clide) PromptInput() Clide {
+func (m Clide) PromptInput() (tea.Model, tea.Cmd) {
 	c := Clide{
 		ready:     m.ready,
 		width:     m.width,
@@ -233,5 +218,5 @@ func (m Clide) PromptInput() Clide {
 
 	c.textinput.Focus()
 
-	return c
+	return c, nil
 }

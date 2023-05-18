@@ -4,14 +4,13 @@ import (
 	"clide/node"
 	"fmt"
 	"os"
-	"os/exec"
+	"syscall"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textinput"
-	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -20,9 +19,7 @@ const (
 	ClideStatePathSelect   = 1
 	ClideStatePromptSelect = 2
 	ClideStatePromptInput  = 3
-	ClideStateDone         = 4
 	ClideStateError        = 5
-	ClideStateLoading      = 6
 )
 
 type KeyMap struct {
@@ -90,7 +87,6 @@ type Clide struct {
 	height    int
 	help      help.Model
 	textinput textinput.Model
-	viewport  viewport.Model
 	list      list.Model
 	spinner   spinner.Model
 	node      *node.CommandNode
@@ -99,7 +95,6 @@ type Clide struct {
 	param     int
 	args      map[string]string
 	keymap    KeyMap
-	cmd       *exec.Cmd
 }
 
 func (m Clide) Init() tea.Cmd {
@@ -114,27 +109,37 @@ func New(args map[string]string) Clide {
 	root, err := node.Root()
 
 	if err != nil {
-		return Clide{}.Error(err.Error())
+		m, _ := Clide{}.Error(err.Error())
+		return m.(Clide)
 	}
 
 	if root == nil {
-		return Clide{}.Error("No project found")
+		m, _ := Clide{}.Error("No project found")
+		return m.(Clide)
 	}
 
-	return Clide{
-		root:    root,
-		node:    root,
-		args:    args,
-		keymap:  DefaultKeyMap,
-		help:    help.New(),
+	m, _ := Clide{
+		root:   root,
+		node:   root,
+		args:   args,
+		keymap: DefaultKeyMap,
+		help:   help.New(),
 	}.PromptPath(root)
+
+	return m.(Clide)
 }
 
 func (m Clide) Run() {
-	_, err := tea.NewProgram(m).Run()
+	c, err := tea.NewProgram(m).Run()
 
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
+	}
+
+	m = c.(Clide)
+
+	if m.state != ClideStateError {
+		syscall.Exec(m.node.Path, []string{m.node.Name}, os.Environ())
 	}
 }

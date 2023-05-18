@@ -123,14 +123,12 @@ func (m Clide) View() string {
 
 	case ClideStatePathSelect:
 		m.list.SetSize(m.width, m.height-verticalSpace)
-		m.list.Title = m.node.Name
-		m.list.Styles.Title = promptStyle
+        m.list.SetShowTitle(false)
 		return fmt.Sprintf("%s\n%s", headerView, m.list.View())
 
 	case ClideStatePromptSelect:
 		m.list.SetSize(m.width, m.height-verticalSpace)
-		m.list.Title = m.params[m.param].Name
-		m.list.Styles.Title = promptStyle
+        m.list.SetShowTitle(false)
 		return fmt.Sprintf("%s\n%s", headerView, m.list.View())
 
 	case ClideStatePromptInput:
@@ -140,16 +138,6 @@ func (m Clide) View() string {
 
 	case ClideStateError:
 		return fmt.Errorf("Clide Error: %s.\n\nPress any key to exit.", m.error).Error()
-
-	case ClideStateDone:
-		m.viewport.Height = m.height - verticalSpace
-		m.viewport.Width = m.width
-        m.viewport.Style = doneStyle
-		return fmt.Sprintf("%s\n%s\n%s", headerView, m.viewport.View(), helpView)
-
-    case ClideStateLoading:
-        sView := spinnerStyle.Render(m.spinner.View())
-        return fmt.Sprintf("%s\n%s Loading...\n%s", headerView, sView, helpView)
 	}
 
 	return "Internal Error: Unknown state"

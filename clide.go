@@ -23,7 +23,8 @@ func main() {
 
 			os.Exit(0)
 		default:
-			Clide{}.Error(fmt.Sprintf("Unknown builtin command '%s'", args[1])).Run()
+            m, _ := Clide{}.Error(fmt.Sprintf("Unknown builtin command '%s'", args[1]))
+            m.(Clide).Run()
 			return
 		}
 	}
@@ -36,7 +37,8 @@ func main() {
 			split := strings.Split(arg, "=")
 
 			if len(split) == 1 {
-				Clide{}.Error(fmt.Sprintf("Parameter '%s' has no value", arg)).Run()
+                m, _ := Clide{}.Error(fmt.Sprintf("Parameter '%s' has no value", arg))
+                m.(Clide).Run()
 				return
 			}
 
@@ -52,11 +54,13 @@ func main() {
 		i := clide.Index(step)
 
 		if i == -1 {
-			Clide{}.Error(fmt.Sprintf("Unknown command '%s'", step)).Run()
+            m, _ := Clide{}.Error(fmt.Sprintf("Unknown command '%s'", step))
+            m.(Clide).Run()
 			return
 		}
 
-		clide = clide.SelectPath(i)
+        m, _ := clide.SelectPath(i)
+        clide = m.(Clide)
 	}
 
 	clide.Run()
