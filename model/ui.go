@@ -32,7 +32,7 @@ func (m Clide) Error(err string) (Clide, tea.Cmd) {
 		width:  m.width,
 		height: m.height,
 		root:   m.root,
-        node:   m.node,
+		node:   m.node,
 		params: m.params,
 		param:  m.param,
 		args:   m.args,
@@ -57,22 +57,22 @@ func (m Clide) Command(n *node.CommandNode) (Clide, tea.Cmd) {
 		return m.nextParameter()
 	}
 
-    return m.Done()
+	return m.Done()
 }
 
 func (m Clide) Done() (Clide, tea.Cmd) {
 	clide := Clide{
-		ready:    m.ready,
-		width:    m.width,
-		height:   m.height,
-		node:     m.node,
-		root:     m.root,
-		args:     m.args,
-		keymap:   m.keymap,
-		help:     m.help,
-		params:   nil,
-		param:    0,
-        state:    ClideStateDone,
+		ready:  m.ready,
+		width:  m.width,
+		height: m.height,
+		node:   m.node,
+		root:   m.root,
+		args:   m.args,
+		keymap: m.keymap,
+		help:   m.help,
+		params: nil,
+		param:  0,
+		state:  ClideStateDone,
 	}
 
 	return clide, tea.Quit
@@ -141,7 +141,7 @@ func (m Clide) PromptPath(n *node.CommandNode) (Clide, tea.Cmd) {
 		list:   list.New(items, list.NewDefaultDelegate(), m.width, m.height),
 	}
 
-    c.list.SetShowHelp(false)
+	c.list.SetShowHelp(false)
 
 	return c, nil
 }
@@ -180,11 +180,13 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 	items := make([]list.Item, len(options))
 
 	for i, choice := range options {
-		values := strings.Split(choice, ":")
-		items[i] = list.Item(item{values[0], values[1]})
+		if choice != "" {
+			values := strings.Split(choice, ":")
+			items[i] = list.Item(item{values[0], values[1]})
+		}
 	}
 
-    c := Clide{
+	c := Clide{
 		ready:  m.ready,
 		width:  m.width,
 		height: m.height,
@@ -199,9 +201,9 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 		list:   list.New(items, list.NewDefaultDelegate(), m.width, m.height),
 	}
 
-    c.list.SetShowHelp(false)
+	c.list.SetShowHelp(false)
 
-    return c, nil
+	return c, nil
 }
 
 func (m Clide) PromptInput() (Clide, tea.Cmd) {
@@ -223,8 +225,8 @@ func (m Clide) PromptInput() (Clide, tea.Cmd) {
 	c.textinput.Width = m.width
 	c.textinput.CharLimit = 50
 	c.textinput.Placeholder = "..."
-    c.textinput.Prompt = ""
-    c.textinput.PromptStyle.BorderBottom(true)
+	c.textinput.Prompt = ""
+	c.textinput.PromptStyle.BorderBottom(true)
 
 	c.textinput.Focus()
 
