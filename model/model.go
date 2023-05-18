@@ -20,10 +20,12 @@ const (
 	ClideStatePromptSelect = 2
 	ClideStatePromptInput  = 3
 	ClideStateError        = 5
-    ClideStateDone         = 6
+	ClideStateDone         = 6
 )
 
 type KeyMap struct {
+	Up      key.Binding
+	Down    key.Binding
 	Next    key.Binding
 	Prev    key.Binding
 	Root    key.Binding
@@ -35,6 +37,14 @@ type KeyMap struct {
 }
 
 var DefaultKeyMap = KeyMap{
+	Up: key.NewBinding(
+		key.WithKeys("up", "k"),
+		key.WithHelp("/k", "up"),
+	),
+	Down: key.NewBinding(
+		key.WithKeys("down", "j"),
+		key.WithHelp("/j", "down"),
+	),
 	Next: key.NewBinding(
 		key.WithKeys("right", "enter"),
 		key.WithHelp("→/enter", "next"),
@@ -70,13 +80,13 @@ var DefaultKeyMap = KeyMap{
 }
 
 func (k KeyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Next, k.Prev, k.Root, k.Quit}
+	return []key.Binding{k.Up, k.Down, k.Next, k.Prev, k.Root, k.Quit}
 }
 
 func (k KeyMap) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
-		{k.Next, k.Prev, k.Root, k.Quit},
-		{k.VimNext, k.VimPrev},
+		{k.Up, k.Down, k.Next, k.Prev, k.Root, k.Quit},
+		{k.VimNext, k.VimPrev, k.VimRoot, k.VimQuit},
 	}
 }
 
@@ -107,19 +117,19 @@ func (m Clide) Leaves() []node.CommandNode {
 }
 
 func (m Clide) Ok() bool {
-    return m.state != ClideStateError
+	return m.state != ClideStateError
 }
 
 func (m Clide) Err() string {
-    return m.error
+	return m.error
 }
 
 func New(args map[string]string) Clide {
 	root, err := node.Root()
 
 	if err != nil {
-        m, _ := Clide{}.Error("Invalid project")
-        return m
+		m, _ := Clide{}.Error("Invalid project")
+		return m
 	}
 
 	if root == nil {
@@ -139,6 +149,10 @@ func New(args map[string]string) Clide {
 }
 
 func (m Clide) Run() {
+	if m.state == ClideStateDone {
+		syscall.Exec(m.node.Path, []string{m.node.Name}, os.Environ())
+	}
+
 	c, err := tea.NewProgram(m).Run()
 
 	if err != nil {

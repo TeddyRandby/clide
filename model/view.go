@@ -120,12 +120,12 @@ func (m Clide) View() string {
 	case ClideStatePathSelect:
 		m.list.SetSize(m.width, m.height-verticalSpace)
         m.list.SetShowTitle(false)
-		return fmt.Sprintf("%s\n%s", headerView, m.list.View())
+		return fmt.Sprintf("%s\n%s\n%s", headerView, m.list.View(), helpView)
 
 	case ClideStatePromptSelect:
 		m.list.SetSize(m.width, m.height-verticalSpace)
         m.list.SetShowTitle(false)
-		return fmt.Sprintf("%s\n%s", headerView, m.list.View())
+		return fmt.Sprintf("%s\n%s\n%s", headerView, m.list.View(), helpView)
 
 	case ClideStatePromptInput:
 		m.textinput.Width = m.width

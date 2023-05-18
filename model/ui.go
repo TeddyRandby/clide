@@ -38,7 +38,7 @@ func (m Clide) Error(err string) (Clide, tea.Cmd) {
 		args:   m.args,
 		keymap: m.keymap,
 		help:   m.help,
-		ready:  true,
+		ready:  m.ready,
 		state:  ClideStateError,
 		error:  err,
 	}, nil
@@ -141,6 +141,8 @@ func (m Clide) PromptPath(n *node.CommandNode) (Clide, tea.Cmd) {
 		list:   list.New(items, list.NewDefaultDelegate(), m.width, m.height),
 	}
 
+    c.list.SetShowHelp(false)
+
 	return c, nil
 }
 
@@ -182,7 +184,7 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 		items[i] = list.Item(item{values[0], values[1]})
 	}
 
-	return Clide{
+    c := Clide{
 		ready:  m.ready,
 		width:  m.width,
 		height: m.height,
@@ -195,7 +197,11 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 		help:   m.help,
 		state:  ClideStatePromptSelect,
 		list:   list.New(items, list.NewDefaultDelegate(), m.width, m.height),
-	}, nil
+	}
+
+    c.list.SetShowHelp(false)
+
+    return c, nil
 }
 
 func (m Clide) PromptInput() (Clide, tea.Cmd) {

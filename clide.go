@@ -39,12 +39,14 @@ func main() {
 	params := make(map[string]string)
 	steps := make([]string, 0)
 
+	clide := New(params)
+
 	for _, arg := range args {
 		if arg[0] == '-' {
 			split := strings.Split(arg, "=")
 
 			if len(split) == 1 {
-                m, _ := Clide{}.Error(fmt.Sprintf("Argument '%s' has no value", arg))
+                m, _ := clide.Error(fmt.Sprintf("Argument '%s' has no value", arg))
                 m.Run()
 				return
 			}
@@ -55,7 +57,7 @@ func main() {
 		}
 	}
 
-	clide := New(params)
+	clide = New(params)
 
     if !clide.Ok() {
         clide.Run()
@@ -66,7 +68,7 @@ func main() {
 		i := clide.Index(step)
 
 		if i == -1 {
-            m, _ := Clide{}.Error(fmt.Sprintf("Unknown command '%s'", step))
+            m, _ := clide.Error(fmt.Sprintf("Unknown command '%s'", step))
             m.Run()
 			return
 		}
