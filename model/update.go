@@ -77,11 +77,11 @@ func (m Clide) updatePathSelect(msg tea.Msg) (Clide, tea.Cmd) {
 			return m.Root()
 
 		case key.Matches(msg, m.keymap.VimNext):
+            fallthrough
+		case key.Matches(msg, m.keymap.Next):
 			if !m.list.SettingFilter() {
 				return m.SelectPath(m.list.Index())
 			}
-		case key.Matches(msg, m.keymap.Next):
-			return m.SelectPath(m.list.Index())
 
 		case key.Matches(msg, m.keymap.VimPrev):
 			if !m.list.SettingFilter() {
@@ -103,17 +103,17 @@ func (m Clide) updateError(msg tea.Msg) (Clide, tea.Cmd) {
 	case tea.KeyMsg:
 		switch {
 		case key.Matches(msg, m.keymap.VimQuit):
-            fallthrough
+			fallthrough
 		case key.Matches(msg, m.keymap.Quit):
 			return m, tea.Quit
 
 		case key.Matches(msg, m.keymap.VimRoot):
-            fallthrough
+			fallthrough
 		case key.Matches(msg, m.keymap.Root):
 			return m.Root()
 
 		case key.Matches(msg, m.keymap.VimPrev):
-            fallthrough
+			fallthrough
 		case key.Matches(msg, m.keymap.Prev):
 			return m.Backtrack()
 		}
@@ -141,11 +141,11 @@ func (m Clide) updateSelect(msg tea.Msg) (Clide, tea.Cmd) {
 			return m.Root()
 
 		case key.Matches(msg, m.keymap.VimNext):
+            fallthrough
+		case key.Matches(msg, m.keymap.Next):
 			if !m.list.SettingFilter() {
 				return m.SetAndPromptNextArgument(m.list.SelectedItem().FilterValue())
 			}
-		case key.Matches(msg, m.keymap.Next):
-			return m.SetAndPromptNextArgument(m.list.SelectedItem().FilterValue())
 
 		case key.Matches(msg, m.keymap.VimPrev):
 			if !m.list.SettingFilter() {
