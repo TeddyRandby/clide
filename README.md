@@ -1,6 +1,11 @@
 # *C L I D E*
 Clide is the Command Line Interface for Developer Experience!
 
+## Installation
+```
+go install github.com/TeddyRandby/clide
+```
+
 ## Problem
 - Is your codebase littered with useful bash scripts and yarn commands?
 - Do they all require passing arguments in a different way?
@@ -98,3 +103,8 @@ Navigating around the menus is great, but sometimes you know the command you wan
  - To shortcut commands, you may also use any uppercase letters in the command/module as a shortcut. Eg: `clide af pd`
  - To shortcut arguments, use a `-` followed by the uppercase letters in the argument name. Eg: `clide -p=Alice say_hello`
 Its important to note that although you define these shortcuts by using uppercase letters, clide only ever shortcuts or passes arguments via lowercase letters.
+
+### Inspiration and references
+ - [Charm](https://charm.sh/)
+ - [Bubbletea](https://github.com/charmbracelet/bubbletea)
+ - [Glow](https://github.com/charmbracelet/glow)
