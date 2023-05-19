@@ -21,8 +21,7 @@ The `.clide` folder is the root of all your command routes.
 
 ### Hello World
 
-Lets do a traditional hello world! Simply add a script in the `.clide` directory.
-```
+Lets do a traditional hello world! Simply add a script in the `.clide` directory. ```
 ━┑
  ┝━.git
  ┕━.clide
@@ -76,8 +75,7 @@ The script `say_hola.sh` is almost identical (because the argument has the same 
 printf "Alice:A friend\nBob:Another friend"
 ```
 Each line that this script outputs will be an option in the list - everything before the `:` is the name, and everything after is the description.
-Now, run Clide. You will see two say_hello options in the list. You can look at the path in the description of each item to see which one is a raw input (using `[]`), and which one is a select (using `{}`).
-
+Now, run Clide. Select `say_hola` and pick a frienda!
 ### Shortcuts
 For the following shortcuts, we've extended our example file structure:
 ```
