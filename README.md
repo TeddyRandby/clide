@@ -4,7 +4,7 @@ Clide is the Command Line Interface for Developer Experience!
 ## Problem
 - Is your codebase littered with useful bash scripts and yarn commands?
 - Do they all require passing arguments in a different way?
-- Do some contributes find them difficult to find/use/update?
+- Do some contributers find them difficult to find/use/update?
 
 ## Why Clide?
 - Organization - The convenience of file based routing .. for the CLI!
