@@ -128,12 +128,20 @@ func New(args map[string]string) Clide {
 	root, err := node.Root()
 
 	if err != nil {
-		m, _ := Clide{}.Error("Invalid project")
+		m, _ := Clide{
+			args:   args,
+			keymap: DefaultKeyMap,
+			help:   help.New(),
+		}.Error(err.Error())
 		return m
 	}
 
 	if root == nil {
-		m, _ := Clide{}.Error("No project found")
+		m, _ := Clide{
+			args:   args,
+			keymap: DefaultKeyMap,
+			help:   help.New(),
+		}.Error("No project found")
 		return m
 	}
 

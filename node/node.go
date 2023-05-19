@@ -41,19 +41,19 @@ func (n CommandNode) Title() string {
 	if n.Shortcut != "" {
 		return fmt.Sprintf("%s %s (%s)", n.Type, n.Name, n.Shortcut)
 	}
-    return fmt.Sprintf("%s %s", n.Type, n.Name)
+	return fmt.Sprintf("%s %s", n.Type, n.Name)
 }
 
 func (n CommandNode) Description() string { return n.clideRelativePath() }
 
-func (n CommandNode) FilterValue() string { return n.Name}
+func (n CommandNode) FilterValue() string { return n.Name }
 
 func moduleNameAndShortcut(original string) (string, string) {
 	name := strings.Split(original, ".")[0]
 
-    if name == "" {
-        name = original
-    }
+	if name == "" {
+		name = original
+	}
 
 	var shortcut string
 	for _, char := range original {
@@ -94,7 +94,7 @@ func (n CommandNode) Leaves() []CommandNode {
 }
 
 func (n CommandNode) clideRelativePath() string {
-    return filepath.Join(n.clideRelativeSteps()...)
+	return filepath.Join(n.clideRelativeSteps()...)
 }
 
 func (n CommandNode) clideRelativeSteps() []string {
@@ -102,13 +102,13 @@ func (n CommandNode) clideRelativeSteps() []string {
 
 	root := slices.Index(steps, ".clide")
 
-    return steps[root+1:] 
+	return steps[root+1:]
 }
 
 func (n CommandNode) Parameters() []CommandNodeParameters {
 	params := make([]CommandNodeParameters, 0)
 
-    steps := n.clideRelativeSteps()
+	steps := n.clideRelativeSteps()
 
 	for _, step := range steps {
 		if strings.Contains(step, "[") {
@@ -194,6 +194,15 @@ func New(parent *CommandNode, pth string) (*CommandNode, error) {
 	return node, nil
 }
 
+func (n CommandNode) findChild(name string) (*CommandNode, error) {
+	for _, child := range n.Children {
+		if child.Name == name {
+			return &child, nil
+		}
+	}
+	return nil, errors.New("Child not found")
+}
+
 func children(parent *CommandNode, dir string) ([]CommandNode, error) {
 	childs, err := path.Children(dir)
 
@@ -240,6 +249,14 @@ func children(parent *CommandNode, dir string) ([]CommandNode, error) {
 
 		}
 	}
+
+    for _, a := range nodes {
+        for _, b := range nodes {
+            if a.Name == b.Name {
+                return nil, errors.New(fmt.Sprintf("Duplicate leaf %s", a.Name))
+            }
+        }
+    }
 
 	return nodes, nil
 }

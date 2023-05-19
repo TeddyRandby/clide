@@ -127,7 +127,7 @@ func (m Clide) newlist(items []list.Item) list.Model {
 	l := list.New(items, delegate, m.width, m.height)
 
 	l.SetShowHelp(false)
-    l.SetShowFilter(false)
+	l.SetShowFilter(false)
 	l.Styles.StatusBar.Foreground(gray)
 	l.Styles.StatusBarFilterCount.Foreground(gray)
 	l.Styles.StatusBarFilterCount.Foreground(gray)
@@ -172,12 +172,12 @@ func (m Clide) PromptPath(n *node.CommandNode) (Clide, tea.Cmd) {
 }
 
 type item struct {
-	name, desc string
+	name, desc, value string
 }
 
 func (i item) Title() string       { return i.name }
 func (i item) Description() string { return i.desc }
-func (i item) FilterValue() string { return i.name }
+func (i item) FilterValue() string { return i.value }
 
 func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 	name := m.params[m.param].Name
@@ -207,11 +207,17 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 	for i, choice := range options {
 		if choice != "" {
 			values := strings.Split(choice, ":")
-			items[i] = list.Item(item{values[0], values[1]})
+
+            value := values[0]
+            if len(values) > 2 {
+                value = values[2]
+            }
+
+			items[i] = list.Item(item{values[0], values[1], value})
 		}
 	}
 
-	return Clide {
+	return Clide{
 		ready:  m.ready,
 		width:  m.width,
 		height: m.height,
