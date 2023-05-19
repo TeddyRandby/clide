@@ -1,4 +1,4 @@
-module clide
+module github.com/teddyrandby/clide
 
 go 1.20
 
