@@ -209,7 +209,7 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 			values := strings.Split(choice, ":")
 
             value := values[0]
-            if len(values) > 1 {
+            if len(values) >= 3 {
                 value = values[2]
             }
 
