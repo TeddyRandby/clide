@@ -75,7 +75,7 @@ The script `say_hola.sh` is almost identical (because the argument has the same 
 printf "Alice:A friend\nBob:Another friend"
 ```
 Each line that this script outputs will be an option in the list - everything before the `:` is the name, and everything after is the description.
-Now, run Clide. Select `say_hola` and pick a frienda!
+Now, run Clide. Select `say_hola` and pick a friend!
 ### Shortcuts
 For the following shortcuts, we've extended our example file structure:
 ```
