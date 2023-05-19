@@ -1,13 +1,13 @@
 package model
 
 import (
-	"clide/node"
-	"clide/path"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 
+	"github.com/TeddyRandby/clide/node"
+	"github.com/TeddyRandby/clide/path"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"

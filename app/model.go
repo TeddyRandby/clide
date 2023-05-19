@@ -1,11 +1,11 @@
 package model
 
 import (
-	"clide/node"
 	"fmt"
 	"os"
 	"syscall"
 
+	"github.com/TeddyRandby/clide/node"
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
@@ -151,14 +151,14 @@ func New(args map[string]string) Clide {
 func (m Clide) Run() {
 	if m.state == ClideStateDone {
 		syscall.Exec(m.node.Path, []string{m.node.Name}, os.Environ())
-        return
+		return
 	}
 
 	c, err := tea.NewProgram(m).Run()
 
 	if err != nil {
 		fmt.Println(err)
-        return
+		return
 	}
 
 	m = c.(Clide)

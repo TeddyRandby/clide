@@ -1,9 +1,9 @@
 package model
 
 import (
-	"clide/node"
 	"strings"
 
+	"github.com/TeddyRandby/clide/node"
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 )

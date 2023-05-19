@@ -1,13 +1,13 @@
 package node
 
 import (
-	"clide/path"
 	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
 	"unicode"
 
+	"github.com/TeddyRandby/clide/path"
 	"golang.org/x/exp/slices"
 )
 
