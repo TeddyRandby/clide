@@ -193,7 +193,7 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 	output, err := cmd.Output()
 
 	if err != nil {
-		return m.Error("Could not execute command")
+		return m.Error(fmt.Sprintf("Could not execute command %s", sibling))
 	}
 
 	options := strings.Split(string(output), "\n")
@@ -209,7 +209,7 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 			values := strings.Split(choice, ":")
 
             value := values[0]
-            if len(values) > 2 {
+            if len(values) > 1 {
                 value = values[2]
             }
 

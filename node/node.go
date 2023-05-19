@@ -250,13 +250,15 @@ func children(parent *CommandNode, dir string) ([]CommandNode, error) {
 		}
 	}
 
-    for _, a := range nodes {
-        for _, b := range nodes {
-            if a.Name == b.Name {
-                return nil, errors.New(fmt.Sprintf("Duplicate leaf %s", a.Name))
-            }
-        }
-    }
+	for i, a := range nodes {
+		for j, b := range nodes {
+			if i != j {
+				if a.Name == b.Name {
+					return nil, errors.New(fmt.Sprintf("Duplicate leaf %s", a.Name))
+				}
+			}
+		}
+	}
 
 	return nodes, nil
 }

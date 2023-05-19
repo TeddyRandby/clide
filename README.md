@@ -67,9 +67,9 @@ Sometimes instead of having the user type in a string, you want to give them an 
     │  ┕━say_hello.sh
     ┕━{Person}
        ┝━person
-       ┕━say_hello.sh
+       ┕━say_hola.sh
 ```
-The script `say_hello.sh` is identical (because the argument has the same name, but our `[]` around the argument in the path are now `{}`. You could even just use a symlink! We do have a new file adjacent to `say_hello.sh`. Its called `person` and it has no extension. This is the script that Clide will use to find the choices for the list. Ours will look simple.
+The script `say_hola.sh` is almost identical (because the argument has the same name, but our `[]` around the argument in the path are now `{}`. You could even just use a symlink! We do have a new file adjacent to `say_hola.sh`. Its called `person` and it has no extension. This is the script that Clide will use to find the choices for the list. Ours will look simple.
 ```bash
 #!/usr/bin/env sh
 
@@ -91,12 +91,11 @@ For the following shortcuts, we've extended our example file structure:
     │  ┕━say_hello.sh
     ┕━{Person}
        ┝━person
-       ┕━say_hello.sh
+       ┕━say_hola.sh
 
 ```
 Navigating around the menus is great, but sometimes you know the command you want to run ahead of time. Clide provies several ways to shortcut your commands:
  - To shortcut commands, you can use any prefix of the command/module. Eg: `clide a p`
  - To shortcut commands, you may also use any uppercase letters in the command/module as a shortcut. Eg: `clide af pd`
- - For duplicate commands, (like say_hello in our example), the first one clide encounters is executed.
  - To shortcut arguments, use a `-` followed by the uppercase letters in the argument name. Eg: `clide -p=Alice say_hello`
 Its important to note that although you define these shortcuts by using uppercase letters, clide only ever shortcuts or passes arguments via lowercase letters.
