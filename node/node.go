@@ -46,7 +46,7 @@ func (n CommandNode) Title() string {
 
 func (n CommandNode) Description() string { return n.clideRelativePath() }
 
-func (n CommandNode) FilterValue() string { return n.Path }
+func (n CommandNode) FilterValue() string { return n.Name}
 
 func moduleNameAndShortcut(original string) (string, string) {
 	name := strings.Split(original, ".")[0]

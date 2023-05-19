@@ -65,15 +65,7 @@ func main() {
     }
 
 	for _, step := range steps {
-		i := clide.Index(step)
-
-		if i == -1 {
-            m, _ := clide.Error(fmt.Sprintf("Unknown command '%s'", step))
-            m.Run()
-			return
-		}
-
-        clide, _ = clide.SelectPath(i)
+        clide, _ = clide.SelectPath(step)
 	}
 
 	clide.Run()

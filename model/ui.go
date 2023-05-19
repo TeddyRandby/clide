@@ -13,6 +13,21 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
+var (
+	delegate = func() list.DefaultDelegate {
+		d := list.NewDefaultDelegate()
+		d.Styles.DimmedTitle.Foreground(white)
+		d.Styles.DimmedDesc.Foreground(gray)
+		d.Styles.NormalTitle.Foreground(fg)
+		d.Styles.NormalDesc.Foreground(white)
+		d.Styles.SelectedTitle.Foreground(purple)
+		d.Styles.SelectedDesc.Foreground(white)
+		d.Styles.SelectedTitle.BorderForeground(purple)
+		d.Styles.SelectedDesc.BorderForeground(purple)
+		return d
+	}()
+)
+
 func (m Clide) Backtrack() (Clide, tea.Cmd) {
 	parent := m.node.Parent
 
@@ -107,6 +122,20 @@ func (m Clide) nextParameter() (Clide, tea.Cmd) {
 	return m.Error("Invalid parameter type")
 }
 
+func (m Clide) newlist(items []list.Item) list.Model {
+
+	l := list.New(items, delegate, m.width, m.height)
+
+	l.SetShowHelp(false)
+    l.SetShowFilter(false)
+	l.Styles.StatusBar.Foreground(gray)
+	l.Styles.StatusBarFilterCount.Foreground(gray)
+	l.Styles.StatusBarFilterCount.Foreground(gray)
+	l.Styles.FilterPrompt.Foreground(yellow)
+
+	return l
+}
+
 func (m Clide) PromptPath(n *node.CommandNode) (Clide, tea.Cmd) {
 	m.node = n
 
@@ -126,7 +155,7 @@ func (m Clide) PromptPath(n *node.CommandNode) (Clide, tea.Cmd) {
 		items[i] = list.Item(choice)
 	}
 
-	c := Clide{
+	return Clide{
 		ready:  m.ready,
 		width:  m.width,
 		height: m.height,
@@ -138,12 +167,8 @@ func (m Clide) PromptPath(n *node.CommandNode) (Clide, tea.Cmd) {
 		keymap: m.keymap,
 		help:   m.help,
 		state:  ClideStatePathSelect,
-		list:   list.New(items, list.NewDefaultDelegate(), m.width, m.height),
-	}
-
-	c.list.SetShowHelp(false)
-
-	return c, nil
+		list:   m.newlist(items),
+	}, nil
 }
 
 type item struct {
@@ -186,7 +211,7 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 		}
 	}
 
-	c := Clide{
+	return Clide {
 		ready:  m.ready,
 		width:  m.width,
 		height: m.height,
@@ -198,12 +223,8 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 		keymap: m.keymap,
 		help:   m.help,
 		state:  ClideStatePromptSelect,
-		list:   list.New(items, list.NewDefaultDelegate(), m.width, m.height),
-	}
-
-	c.list.SetShowHelp(false)
-
-	return c, nil
+		list:   m.newlist(items),
+	}, nil
 }
 
 func (m Clide) PromptInput() (Clide, tea.Cmd) {

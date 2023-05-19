@@ -22,18 +22,21 @@ func (m Clide) Index(name string) int {
 	return -1
 }
 
-func (m Clide) SelectPath(index int) (Clide, tea.Cmd) {
-	n := m.node.Children[index]
+func (m Clide) SelectPath(name string) (Clide, tea.Cmd) {
+	for _, child := range m.node.Children {
 
-	switch n.Type {
-	case node.NodeTypeCommand:
-		return m.Command(&n)
+		if strings.HasPrefix(child.Name, name) || child.Shortcut == name {
+			switch child.Type {
+			case node.NodeTypeCommand:
+				return m.Command(&child)
 
-	case node.NodeTypeModule:
-		return m.PromptPath(&n)
+			case node.NodeTypeModule:
+				return m.PromptPath(&child)
+			}
+		}
 	}
 
-	return m, nil
+	return m.Error("No such command or module")
 }
 
 func (m Clide) updateInput(msg tea.Msg) (Clide, tea.Cmd) {
@@ -77,10 +80,10 @@ func (m Clide) updatePathSelect(msg tea.Msg) (Clide, tea.Cmd) {
 			return m.Root()
 
 		case key.Matches(msg, m.keymap.VimNext):
-            fallthrough
+			fallthrough
 		case key.Matches(msg, m.keymap.Next):
 			if !m.list.SettingFilter() {
-				return m.SelectPath(m.list.Index())
+				return m.SelectPath(m.list.SelectedItem().FilterValue())
 			}
 
 		case key.Matches(msg, m.keymap.VimPrev):
@@ -141,7 +144,7 @@ func (m Clide) updateSelect(msg tea.Msg) (Clide, tea.Cmd) {
 			return m.Root()
 
 		case key.Matches(msg, m.keymap.VimNext):
-            fallthrough
+			fallthrough
 		case key.Matches(msg, m.keymap.Next):
 			if !m.list.SettingFilter() {
 				return m.SetAndPromptNextArgument(m.list.SelectedItem().FilterValue())
