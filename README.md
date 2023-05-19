@@ -21,7 +21,8 @@ The `.clide` folder is the root of all your command routes.
 
 ### Hello World
 
-Lets do a traditional hello world! Simply add a script in the `.clide` directory. ```
+Lets do a traditional hello world! Simply add a script in the `.clide` directory. 
+```
 ━┑
  ┝━.git
  ┕━.clide
