@@ -205,6 +205,7 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 	items := make([]list.Item, len(options))
 
 	for i, choice := range options {
+        choice = strings.Trim(choice, " \n\t")
 		if choice != "" {
 			values := strings.Split(choice, ":")
 
