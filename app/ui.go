@@ -196,7 +196,9 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 		return m.Error(fmt.Sprintf("Could not execute command %s", sibling))
 	}
 
-	options := strings.Split(string(output), "\n")
+    trimmed := strings.Trim(string(output), " \n\t")
+
+	options := strings.Split(trimmed, "\n")
 
 	if len(options) == 0 {
 		return m.Error(fmt.Sprintf("%s yielded no options", name))
