@@ -207,14 +207,19 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 	for i, choice := range options {
         choice = strings.Trim(choice, " \n\t")
 		if choice != "" {
-			values := strings.Split(choice, ":")
+			spec := strings.Split(choice, ":")
 
-            value := values[0]
-            if len(values) >= 3 {
-                value = values[2]
+            desc := ""
+            if len(spec) >= 2 {
+                desc = spec[1]
             }
 
-			items[i] = list.Item(item{values[0], values[1], value})
+            value := spec[0]
+            if len(spec) >= 3 {
+                value = spec[2]
+            }
+
+			items[i] = list.Item(item{spec[0], desc, value})
 		}
 	}
 
