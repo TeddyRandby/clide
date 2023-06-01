@@ -28,7 +28,7 @@ type CommandNode struct {
 const (
 	CommandNodeParamTypeInput    = "Input"
 	CommandNodeParamTypeSelect   = "Select"
-	CommandNodeParamTypeCheckbox = "Checkbox"
+	CommandNodeParamTypeTextarea = "Textarea"
 )
 
 type CommandNodeParameters struct {
@@ -66,7 +66,7 @@ func moduleNameAndShortcut(original string) (string, string) {
 }
 
 func parameterNameAndShortcut(original string) (string, string) {
-	name := strings.Trim(original, "[]{}<>")
+	name := strings.Trim(original, path.ParamChars)
 
 	var shortcut string
 	for _, char := range original {
@@ -111,26 +111,26 @@ func (n CommandNode) Parameters() []CommandNodeParameters {
 	steps := n.clideRelativeSteps()
 
 	for _, step := range steps {
-		if strings.Contains(step, "[") {
+		if strings.ContainsAny(step, path.ParamInputChars) {
 			name, shortcut := parameterNameAndShortcut(step)
 			params = append(params, CommandNodeParameters{
 				Name:     name,
 				Shortcut: shortcut,
 				Type:     CommandNodeParamTypeInput,
 			})
-		} else if strings.Contains(step, "{") {
+		} else if strings.ContainsAny(step, path.ParamSelectChars) {
 			name, shortcut := parameterNameAndShortcut(step)
 			params = append(params, CommandNodeParameters{
 				Name:     name,
 				Shortcut: shortcut,
 				Type:     CommandNodeParamTypeSelect,
 			})
-		} else if strings.Contains(step, "<") {
+		} else if strings.ContainsAny(step, path.ParamTextareaChars) {
 			name, shortcut := parameterNameAndShortcut(step)
 			params = append(params, CommandNodeParameters{
 				Name:     name,
 				Shortcut: shortcut,
-				Type:     CommandNodeParamTypeCheckbox,
+				Type:     CommandNodeParamTypeTextarea,
 			})
 		}
 	}
