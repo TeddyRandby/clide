@@ -6,6 +6,13 @@ import (
 	"strings"
 )
 
+const (
+    ParamInputChars = "[]"
+    ParamSelectChars = "{}"
+    ParamTextareaChars = ":"
+    ParamChars = ParamInputChars + ParamSelectChars + ParamTextareaChars
+)
+
 func Exists(filename string) bool {
 	_, err := os.Stat(filename)
 
@@ -53,7 +60,7 @@ func IsLeaf(path string) bool {
 }
 
 func IsParameter(path string) bool {
-    return strings.ContainsAny(filepath.Base(path), "(){}[]")
+    return strings.ContainsAny(filepath.Base(path), ParamChars)
 }
 
 func IsModule(path string) bool {
@@ -74,7 +81,13 @@ func findRoot(path string) (string, error) {
 		return "", nil
 	}
 
-	return findRoot(filepath.Join(path, ".."))
+    parentPath := filepath.Join(path, "..")
+
+    if parentPath == path {
+        return "", nil
+    }
+
+    return findRoot(parentPath)
 }
 
 func FindRoot() (string, error) {

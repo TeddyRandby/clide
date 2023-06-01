@@ -39,6 +39,32 @@ func (m Clide) SelectPath(name string) (Clide, tea.Cmd) {
 	return m.Error("No such command or module")
 }
 
+func (m Clide) updateArea(msg tea.Msg) (Clide, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		if strings.Contains(msg.String(), "enter") {
+			m.textarea.InsertString("\n\n")
+		}
+
+		switch {
+		case key.Matches(msg, m.keymap.Next):
+			value := m.textarea.Value()
+			return m.SetAndPromptNextArgument(value)
+		case key.Matches(msg, m.keymap.Prev):
+			return m.Backtrack()
+		case key.Matches(msg, m.keymap.Quit):
+			return m, tea.Quit
+		case key.Matches(msg, m.keymap.Root):
+			return m.Root()
+		}
+	}
+
+	var cmd tea.Cmd
+	m.textarea, cmd = m.textarea.Update(msg)
+
+	return m, cmd
+}
+
 func (m Clide) updateInput(msg tea.Msg) (Clide, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -85,7 +111,6 @@ func (m Clide) updatePathSelect(msg tea.Msg) (Clide, tea.Cmd) {
 			if !m.list.SettingFilter() {
 				return m.SelectPath(m.list.SelectedItem().FilterValue())
 			}
-
 		case key.Matches(msg, m.keymap.VimPrev):
 			if !m.list.SettingFilter() {
 				return m.Backtrack()
@@ -188,7 +213,10 @@ func (m Clide) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case ClideStatePromptInput:
 		return m.updateInput(msg)
+
+	case ClideStatePromptArea:
+		return m.updateArea(msg)
 	}
 
-	return m, nil
+	panic("unreachable")
 }

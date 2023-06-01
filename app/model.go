@@ -10,17 +10,19 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/spinner"
+	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 const (
-	ClideStateStart        = 0
-	ClideStatePathSelect   = 1
-	ClideStatePromptSelect = 2
-	ClideStatePromptInput  = 3
-	ClideStateError        = 5
-	ClideStateDone         = 6
+	ClideStateStart = iota
+	ClideStatePathSelect
+	ClideStatePromptSelect
+	ClideStatePromptInput
+	ClideStatePromptArea
+	ClideStateError
+	ClideStateDone
 )
 
 type KeyMap struct {
@@ -98,6 +100,7 @@ type Clide struct {
 	height    int
 	help      help.Model
 	textinput textinput.Model
+	textarea  textarea.Model
 	list      list.Model
 	spinner   spinner.Model
 	node      *node.CommandNode
@@ -157,6 +160,8 @@ func New(args map[string]string) Clide {
 }
 
 func (m Clide) Run() {
+    os.Setenv("CLIDE_PATH", m.root.Path)
+
 	if m.state == ClideStateDone {
 		syscall.Exec(m.node.Path, []string{m.node.Name}, os.Environ())
 		return

@@ -123,6 +123,11 @@ func (m Clide) View() string {
 
 	switch m.state {
 
+    case ClideStateStart:
+        fallthrough
+    case ClideStateDone:
+        return ""
+
 	case ClideStatePathSelect:
 		m.list.SetSize(m.width, m.height-verticalSpace)
 		m.list.SetShowTitle(false)
@@ -143,10 +148,16 @@ func (m Clide) View() string {
 		blank := strings.Repeat("\n", max(0, lines-lipgloss.Height(inputView)))
 		return fmt.Sprintf("%s\n%s%s\n%s%s", headerView, header, inputView, blank, helpView)
 
+    case ClideStatePromptArea:
+        m.textarea.SetWidth(m.width)
+        m.textarea.SetHeight(m.height - verticalSpace - 2)
+
+        return fmt.Sprintf("%s\n\n%s\n\n%s", headerView, m.textarea.View(), helpView)
+
 	case ClideStateError:
 		content := errorStyle.Copy().Height(m.height - verticalSpace).Render(fmt.Sprintf("Clide Error: %s.\n\n", m.error))
 		return fmt.Sprintf("%s\n%s\n%s", headerView, content, helpView)
 	}
 
-	return "Internal Error: Unknown state"
+    panic("unreachable")
 }

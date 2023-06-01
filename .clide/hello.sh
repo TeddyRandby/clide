@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
 
-echo "Hello World!"
+echo "Hello World! $CLIDE_PATH"

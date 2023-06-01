@@ -9,6 +9,7 @@ import (
 	"github.com/TeddyRandby/clide/node"
 	"github.com/TeddyRandby/clide/path"
 	"github.com/charmbracelet/bubbles/list"
+	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -117,6 +118,8 @@ func (m Clide) nextParameter() (Clide, tea.Cmd) {
 		return m.PromptInput()
 	case node.CommandNodeParamTypeSelect:
 		return m.PromptSelect()
+	case node.CommandNodeParamTypeTextarea:
+		return m.PromptTextarea()
 	}
 
 	return m.Error("Invalid parameter type")
@@ -196,7 +199,7 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 		return m.Error(fmt.Sprintf("Could not execute command %s", sibling))
 	}
 
-    trimmed := strings.Trim(string(output), " \n\t")
+	trimmed := strings.Trim(string(output), " \n\t")
 
 	options := strings.Split(trimmed, "\n")
 
@@ -207,19 +210,19 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 	items := make([]list.Item, len(options))
 
 	for i, choice := range options {
-        choice = strings.Trim(choice, " \n\t")
+		choice = strings.Trim(choice, " \n\t")
 		if choice != "" {
 			spec := strings.Split(choice, ":")
 
-            desc := ""
-            if len(spec) >= 2 {
-                desc = spec[1]
-            }
+			desc := ""
+			if len(spec) >= 2 {
+				desc = spec[1]
+			}
 
-            value := spec[0]
-            if len(spec) >= 3 {
-                value = spec[2]
-            }
+			value := spec[0]
+			if len(spec) >= 3 {
+				value = spec[2]
+			}
 
 			items[i] = list.Item(item{spec[0], desc, value})
 		}
@@ -239,6 +242,33 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 		state:  ClideStatePromptSelect,
 		list:   m.newlist(items),
 	}, nil
+}
+
+func (m Clide) PromptTextarea() (Clide, tea.Cmd) {
+	c := Clide{
+		ready:    m.ready,
+		width:    m.width,
+		height:   m.height,
+		node:     m.node,
+		root:     m.root,
+		params:   m.params,
+		param:    m.param,
+		args:     m.args,
+		keymap:   m.keymap,
+		help:     m.help,
+		state:    ClideStatePromptArea,
+		textarea: textarea.New(),
+	}
+
+    c.textarea.CharLimit = 200
+    c.textarea.ShowLineNumbers = false
+    c.textarea.FocusedStyle.CursorLine.Background(bg)
+    c.textarea.FocusedStyle.Prompt.Margin(0,0,0,1)
+    c.textarea.FocusedStyle.Prompt.Foreground(white)
+
+    c.textarea.Focus()
+
+    return c, nil
 }
 
 func (m Clide) PromptInput() (Clide, tea.Cmd) {
@@ -261,7 +291,6 @@ func (m Clide) PromptInput() (Clide, tea.Cmd) {
 	c.textinput.CharLimit = 50
 	c.textinput.Placeholder = "..."
 	c.textinput.Prompt = ""
-	c.textinput.PromptStyle.BorderBottom(true)
 
 	c.textinput.Focus()
 
