@@ -9,8 +9,7 @@ import (
 const (
     ParamInputChars = "[]"
     ParamSelectChars = "{}"
-    ParamTextareaChars = ":"
-    ParamChars = ParamInputChars + ParamSelectChars + ParamTextareaChars
+    ParamChars = ParamInputChars + ParamSelectChars
 )
 
 func Exists(filename string) bool {

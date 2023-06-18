@@ -1,6 +1,9 @@
 # *C L I D E*
 Clide is the Command Line Interface for Developer Experience!
 
+## Dependencies
+None! Although I do recommend you install a [Nerd Font](https://www.nerdfonts.com/) if you don't have one already.
+
 ## Installation
 ```
 go install github.com/TeddyRandby/clide
@@ -25,7 +28,6 @@ At the top level of your git repository, add a new folder:
 The `.clide` folder is the root of all your command routes.
 
 ### Hello World
-
 Lets do a traditional hello world! Simply add a script in the `.clide` directory. 
 ```
 ━┑
@@ -61,6 +63,9 @@ echo "Hello $person!"
 ```
 Similar to tools like *NEXT* or *Sveltekit*, the brackets in the path let Clide know that the scripts under it need an argument with that name. No matter how you capitalize the argument, clide will always supply the script with a variable in all lowercase. Now run `clide`. You should be prompted to provide a value for the argument `person`. Type in a value and press enter!
 
+It can also be useful to have default values for these sorts of text inputs. To do this, add a bash script with the same name as that parameter (no extension). The output of this script will be piped directly into the paramter.
+
+
 ### Passing Select Arguments
 Sometimes instead of having the user type in a string, you want to give them an option from a list. Clide has that too! Lets see it in action.
 ```
@@ -81,7 +86,9 @@ The script `say_hola.sh` is almost identical (because the argument has the same 
 printf "Alice:A friend\nBob:Another friend"
 ```
 Each line that this script outputs will be an option in the list - everything before the `:` is the name, and everything after is the description.
+
 Now, run Clide. Select `say_hola` and pick a friend!
+
 ### Shortcuts
 For the following shortcuts, we've extended our example file structure:
 ```
@@ -96,12 +103,12 @@ For the following shortcuts, we've extended our example file structure:
     ┕━{Person}
        ┝━person
        ┕━say_hola.sh
-
 ```
 Navigating around the menus is great, but sometimes you know the command you want to run ahead of time. Clide provies several ways to shortcut your commands:
  - To shortcut commands, you can use any prefix of the command/module. Eg: `clide a p`
  - To shortcut commands, you may also use any uppercase letters in the command/module as a shortcut. Eg: `clide af pd`
  - To shortcut arguments, use a `-` followed by the uppercase letters in the argument name. Eg: `clide -p=Alice say_hello`
+
 Its important to note that although you define these shortcuts by using uppercase letters, clide only ever shortcuts or passes arguments via lowercase letters.
 
 ### Inspiration and references
