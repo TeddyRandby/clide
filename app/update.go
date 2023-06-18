@@ -45,7 +45,7 @@ func (m Clide) updateInput(msg tea.Msg) (Clide, tea.Cmd) {
 		switch {
 		case key.Matches(msg, m.keymap.Next):
 			value := m.textarea.Value()
-			return m.SetAndPromptNextArgument(value)
+			return m.SetAndPromptNextParameter(value)
 		case key.Matches(msg, m.keymap.Prev):
 			return m.Backtrack()
 		case key.Matches(msg, m.keymap.Quit):
@@ -146,7 +146,7 @@ func (m Clide) updateSelect(msg tea.Msg) (Clide, tea.Cmd) {
 			fallthrough
 		case key.Matches(msg, m.keymap.Next):
 			if !m.list.SettingFilter() {
-				return m.SetAndPromptNextArgument(m.list.SelectedItem().FilterValue())
+				return m.SetAndPromptNextParameter(m.list.SelectedItem().FilterValue())
 			}
 
 		case key.Matches(msg, m.keymap.VimPrev):
