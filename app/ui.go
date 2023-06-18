@@ -2,7 +2,6 @@ package model
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
 	"strings"
 
@@ -10,7 +9,6 @@ import (
 	"github.com/TeddyRandby/clide/path"
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textarea"
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -34,6 +32,12 @@ func (m Clide) Backtrack() (Clide, tea.Cmd) {
 
 	if parent == nil {
 		return m, nil
+	}
+
+	if m.param != 0 {
+		m.param--
+		m.params[m.param].Value = ""
+		return m.nextParameter()
 	}
 
 	return m.PromptPath(parent)
@@ -86,8 +90,8 @@ func (m Clide) Done() (Clide, tea.Cmd) {
 		args:   m.args,
 		keymap: m.keymap,
 		help:   m.help,
-		params: nil,
-		param:  0,
+		params: m.params,
+		param:  m.param,
 		state:  ClideStateDone,
 	}
 
@@ -95,7 +99,7 @@ func (m Clide) Done() (Clide, tea.Cmd) {
 }
 
 func (m Clide) SetAndPromptNextArgument(value string) (Clide, tea.Cmd) {
-	os.Setenv(m.params[m.param].Name, value)
+	m.params[m.param].Value = value
 	m.param++
 
 	if len(m.params) > m.param {
@@ -118,8 +122,6 @@ func (m Clide) nextParameter() (Clide, tea.Cmd) {
 		return m.PromptInput()
 	case node.CommandNodeParamTypeSelect:
 		return m.PromptSelect()
-	case node.CommandNodeParamTypeTextarea:
-		return m.PromptTextarea()
 	}
 
 	return m.Error("Invalid parameter type")
@@ -158,7 +160,7 @@ func (m Clide) PromptPath(n *node.CommandNode) (Clide, tea.Cmd) {
 		items[i] = list.Item(choice)
 	}
 
-	return Clide{
+    c := Clide{
 		ready:  m.ready,
 		width:  m.width,
 		height: m.height,
@@ -171,7 +173,11 @@ func (m Clide) PromptPath(n *node.CommandNode) (Clide, tea.Cmd) {
 		help:   m.help,
 		state:  ClideStatePathSelect,
 		list:   m.newlist(items),
-	}, nil
+	}
+
+    c.list.SetShowTitle(false)
+
+    return c, nil
 }
 
 type item struct {
@@ -228,7 +234,7 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 		}
 	}
 
-	return Clide{
+    c := Clide{
 		ready:  m.ready,
 		width:  m.width,
 		height: m.height,
@@ -241,10 +247,32 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 		help:   m.help,
 		state:  ClideStatePromptSelect,
 		list:   m.newlist(items),
-	}, nil
+	}
+
+    c.list.SetShowTitle(false)
+
+    return c, nil
 }
 
-func (m Clide) PromptTextarea() (Clide, tea.Cmd) {
+func (m Clide) PromptInput() (Clide, tea.Cmd) {
+	name := m.params[m.param].Name
+
+	sibling := path.HasSibling(m.node.Path, name)
+
+    defaultValue := ""
+
+	if sibling != "" {
+		cmd := exec.Command(sibling)
+
+		output, err := cmd.Output()
+
+		if err != nil {
+			return m.Error(fmt.Sprintf("Could not execute command %s", sibling))
+		}
+
+		defaultValue = strings.Trim(string(output), " \n\t")
+	}
+
 	c := Clide{
 		ready:    m.ready,
 		width:    m.width,
@@ -256,43 +284,18 @@ func (m Clide) PromptTextarea() (Clide, tea.Cmd) {
 		args:     m.args,
 		keymap:   m.keymap,
 		help:     m.help,
-		state:    ClideStatePromptArea,
+		state:    ClideStatePromptInput,
 		textarea: textarea.New(),
 	}
 
-    c.textarea.CharLimit = 200
-    c.textarea.ShowLineNumbers = false
-    c.textarea.FocusedStyle.CursorLine.Background(bg)
-    c.textarea.FocusedStyle.Prompt.Margin(0,0,0,1)
-    c.textarea.FocusedStyle.Prompt.Foreground(white)
+    c.textarea.SetValue(defaultValue)
+	c.textarea.CharLimit = 200
+	c.textarea.ShowLineNumbers = false
+	c.textarea.FocusedStyle.CursorLine.Background(bg)
+	c.textarea.FocusedStyle.Prompt.Margin(0, 0, 0, 1)
+	c.textarea.FocusedStyle.Prompt.Foreground(white)
 
-    c.textarea.Focus()
-
-    return c, nil
-}
-
-func (m Clide) PromptInput() (Clide, tea.Cmd) {
-	c := Clide{
-		ready:     m.ready,
-		width:     m.width,
-		height:    m.height,
-		node:      m.node,
-		root:      m.root,
-		params:    m.params,
-		param:     m.param,
-		args:      m.args,
-		keymap:    m.keymap,
-		help:      m.help,
-		state:     ClideStatePromptInput,
-		textinput: textinput.New(),
-	}
-
-	c.textinput.Width = m.width
-	c.textinput.CharLimit = 50
-	c.textinput.Placeholder = "..."
-	c.textinput.Prompt = ""
-
-	c.textinput.Focus()
+	c.textarea.Focus()
 
 	return c, nil
 }

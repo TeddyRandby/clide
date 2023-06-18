@@ -11,7 +11,6 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textarea"
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
@@ -20,7 +19,6 @@ const (
 	ClideStatePathSelect
 	ClideStatePromptSelect
 	ClideStatePromptInput
-	ClideStatePromptArea
 	ClideStateError
 	ClideStateDone
 )
@@ -93,22 +91,21 @@ func (k KeyMap) FullHelp() [][]key.Binding {
 }
 
 type Clide struct {
-	state     int
-	error     string
-	ready     bool
-	width     int
-	height    int
-	help      help.Model
-	textinput textinput.Model
-	textarea  textarea.Model
-	list      list.Model
-	spinner   spinner.Model
-	node      *node.CommandNode
-	root      *node.CommandNode
-	params    []node.CommandNodeParameters
-	param     int
-	args      map[string]string
-	keymap    KeyMap
+	state    int
+	error    string
+	ready    bool
+	width    int
+	height   int
+	help     help.Model
+	textarea textarea.Model
+	list     list.Model
+	spinner  spinner.Model
+	node     *node.CommandNode
+	root     *node.CommandNode
+	params   []node.CommandNodeParameters
+	param    int
+	args     map[string]string
+	keymap   KeyMap
 }
 
 func (m Clide) Init() tea.Cmd {
@@ -159,12 +156,22 @@ func New(args map[string]string) Clide {
 	return m
 }
 
-func (m Clide) Run() {
-    os.Setenv("CLIDE_PATH", m.root.Path)
+func (m Clide) env() []string {
+	env := os.Environ()
 
+	env = append(env, "CLIDE_PATH="+m.root.Path)
+
+	for i := 0; i < len(m.params); i++ {
+		env = append(env, m.params[i].Name+"="+m.params[i].Value)
+	}
+
+	return env
+}
+
+func (m Clide) Run() {
 	if m.state == ClideStateDone {
-		syscall.Exec(m.node.Path, []string{m.node.Name}, os.Environ())
-		return
+		syscall.Exec(m.node.Path, []string{m.node.Name}, m.env())
+        return
 	}
 
 	c, err := tea.NewProgram(m).Run()
@@ -177,6 +184,6 @@ func (m Clide) Run() {
 	m = c.(Clide)
 
 	if m.state == ClideStateDone {
-		syscall.Exec(m.node.Path, []string{m.node.Name}, os.Environ())
+		syscall.Exec(m.node.Path, []string{m.node.Name}, m.env())
 	}
 }

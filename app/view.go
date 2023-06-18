@@ -2,7 +2,6 @@ package model
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -39,8 +38,7 @@ var (
 	promptStyle = func() lipgloss.Style {
 		return lipgloss.
 			NewStyle().
-			Foreground(bg).
-			Background(purple).
+			Foreground(orange).
 			Margin(1, 1, 0).
 			Padding(0, 1)
 	}()
@@ -100,12 +98,30 @@ func (m Clide) headerView() string {
 		reversed[i+1] = renderedSteps[len(renderedSteps)-i-1]
 	}
 
-	return lipgloss.JoinHorizontal(lipgloss.Top, reversed...)
+	return lipgloss.JoinHorizontal(lipgloss.Center, reversed...)
+}
+
+func (m Clide) promptView() string {
+	var params []string
+
+	for i := 0; i < m.param+1; i++ {
+		var str string
+
+		if m.params[i].Value != "" {
+			str = stepStyle.Render(m.params[i].Value)
+		} else {
+			str = promptStyle.Render(m.params[i].Name)
+		}
+
+		params = append(params, str, sepStyle.Render("/"))
+	}
+
+	return lipgloss.JoinHorizontal(lipgloss.Center, params...)
 }
 
 func (m Clide) helpView() string {
-    m.help.Styles.ShortKey.Foreground(gray)
-    m.help.Styles.ShortDesc.Foreground(gray)
+	m.help.Styles.ShortKey.Foreground(gray)
+	m.help.Styles.ShortDesc.Foreground(gray)
 	return helpStyle.Render(m.help.View(m.keymap))
 }
 
@@ -123,41 +139,55 @@ func (m Clide) View() string {
 
 	switch m.state {
 
-    case ClideStateStart:
-        fallthrough
-    case ClideStateDone:
-        return ""
+	case ClideStateStart:
+		fallthrough
+	case ClideStateDone:
+		return ""
 
 	case ClideStatePathSelect:
-		m.list.SetSize(m.width, m.height-verticalSpace)
-		m.list.SetShowTitle(false)
-		return fmt.Sprintf("%s\n%s\n%s", headerView, m.list.View(), helpView)
+		m.list.SetSize(m.width, m.height-verticalSpace-2)
+
+		return fmt.Sprintf(
+            "%s\n\n%s\n\n%s",
+            headerView,
+            m.list.View(),
+            helpView,
+        )
 
 	case ClideStatePromptSelect:
-		m.list.SetSize(m.width, m.height-verticalSpace)
-		m.list.SetShowTitle(false)
-		return fmt.Sprintf("%s\n%s\n%s", headerView, m.list.View(), helpView)
+		m.list.SetSize(m.width, m.height-verticalSpace-2)
+
+		return fmt.Sprintf(
+            "%s\n%s\n%s",
+			lipgloss.JoinHorizontal(lipgloss.Right, headerView, m.promptView()),
+			m.list.View(),
+			helpView,
+        )
 
 	case ClideStatePromptInput:
-		m.textinput.Width = m.width
-		header := promptStyle.Render(m.params[m.param].Name)
+		m.textarea.SetWidth(m.width)
 
-		inputView := m.textinput.View()
+		m.textarea.SetHeight(m.height - verticalSpace - 2)
 
-		lines := m.height - verticalSpace - 1
-		blank := strings.Repeat("\n", max(0, lines-lipgloss.Height(inputView)))
-		return fmt.Sprintf("%s\n%s%s\n%s%s", headerView, header, inputView, blank, helpView)
-
-    case ClideStatePromptArea:
-        m.textarea.SetWidth(m.width)
-        m.textarea.SetHeight(m.height - verticalSpace - 2)
-
-        return fmt.Sprintf("%s\n\n%s\n\n%s", headerView, m.textarea.View(), helpView)
+		return fmt.Sprintf(
+            "%s\n\n%s\n\n%s",
+			lipgloss.JoinHorizontal(lipgloss.Right, headerView, m.promptView()),
+			m.textarea.View(),
+			helpView,
+        )
 
 	case ClideStateError:
-		content := errorStyle.Copy().Height(m.height - verticalSpace).Render(fmt.Sprintf("Clide Error: %s.\n\n", m.error))
-		return fmt.Sprintf("%s\n%s\n%s", headerView, content, helpView)
+		content := errorStyle.
+			Copy().
+			Height(m.height - verticalSpace - 2).
+			Render(fmt.Sprintf("Clide Error: %s.", m.error))
+
+		return fmt.Sprintf(
+            "%s\n\n%s\n\n%s",
+            headerView,
+            content,
+            helpView)
 	}
 
-    panic("unreachable")
+	panic("unreachable")
 }

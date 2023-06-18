@@ -26,15 +26,15 @@ type CommandNode struct {
 }
 
 const (
-	CommandNodeParamTypeInput    = "Input"
-	CommandNodeParamTypeSelect   = "Select"
-	CommandNodeParamTypeTextarea = "Textarea"
+	CommandNodeParamTypeInput  = "Input"
+	CommandNodeParamTypeSelect = "Select"
 )
 
 type CommandNodeParameters struct {
 	Shortcut string
 	Name     string
 	Type     string
+    Value    string
 }
 
 func (n CommandNode) Title() string {
@@ -124,13 +124,6 @@ func (n CommandNode) Parameters() []CommandNodeParameters {
 				Name:     name,
 				Shortcut: shortcut,
 				Type:     CommandNodeParamTypeSelect,
-			})
-		} else if strings.ContainsAny(step, path.ParamTextareaChars) {
-			name, shortcut := parameterNameAndShortcut(step)
-			params = append(params, CommandNodeParameters{
-				Name:     name,
-				Shortcut: shortcut,
-				Type:     CommandNodeParamTypeTextarea,
 			})
 		}
 	}
