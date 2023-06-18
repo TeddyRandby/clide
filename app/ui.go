@@ -98,7 +98,7 @@ func (m Clide) Done() (Clide, tea.Cmd) {
 	return clide, tea.Quit
 }
 
-func (m Clide) SetAndPromptNextArgument(value string) (Clide, tea.Cmd) {
+func (m Clide) SetAndPromptNextParameter(value string) (Clide, tea.Cmd) {
 	m.params[m.param].Value = value
 	m.param++
 
@@ -114,7 +114,7 @@ func (m Clide) nextParameter() (Clide, tea.Cmd) {
 
 	shortcutValue := m.args[param.Shortcut]
 	if shortcutValue != "" {
-		return m.SetAndPromptNextArgument(shortcutValue)
+		return m.SetAndPromptNextParameter(shortcutValue)
 	}
 
 	switch param.Type {

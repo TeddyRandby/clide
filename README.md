@@ -11,7 +11,7 @@ go install github.com/TeddyRandby/clide
 
 ## Problem
 - Is your codebase littered with useful bash scripts and yarn commands?
-- Do they all require passing arguments in a different way?
+- Do they all require passing parameters in a different way?
 - Do some contributers find them difficult to find/use/update?
 
 ## Why Clide?
@@ -43,7 +43,7 @@ echo "Hello World!"
 ```
 Now, run `clide`. You should be prompted with a menu where you can select `hello`. Press enter!
 
-### Passing Input Arguments
+### Passing Paramters
 Often in little bash scripts its useful to have the user provide some input. Clide has this built in!
 
 If you've ever built a backend with file system based routing, this will look very familiar.
