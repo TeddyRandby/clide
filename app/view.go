@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -11,6 +12,13 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func min(a, b int) int {
+    if a > b {
+        return b
+    }
+    return a
 }
 
 var (
@@ -148,33 +156,40 @@ func (m Clide) View() string {
 		m.list.SetSize(m.width, m.height-verticalSpace-2)
 
 		return fmt.Sprintf(
-            "%s\n\n%s\n\n%s",
-            headerView,
-            m.list.View(),
-            helpView,
-        )
+			"%s\n\n%s\n\n%s",
+			headerView,
+			m.list.View(),
+			helpView,
+		)
 
 	case ClideStatePromptSelect:
 		m.list.SetSize(m.width, m.height-verticalSpace-2)
 
 		return fmt.Sprintf(
-            "%s\n%s\n%s",
+			"%s\n%s\n%s",
 			lipgloss.JoinHorizontal(lipgloss.Right, headerView, m.promptView()),
 			m.list.View(),
 			helpView,
-        )
+		)
 
 	case ClideStatePromptInput:
 		m.textarea.SetWidth(m.width)
 
-		m.textarea.SetHeight(m.height - verticalSpace - 2)
+		spaceRemaining := m.height - verticalSpace - 2
 
-		return fmt.Sprintf(
-            "%s\n\n%s\n\n%s",
+        textareaHeight := min(spaceRemaining / 2, 8)
+
+		m.textarea.SetHeight(textareaHeight)
+
+		padding := spaceRemaining - textareaHeight - 1
+
+		return lipgloss.JoinVertical(lipgloss.Left,
 			lipgloss.JoinHorizontal(lipgloss.Right, headerView, m.promptView()),
+            "\n",
 			m.textarea.View(),
+			strings.Repeat("\n", padding),
 			helpView,
-        )
+		)
 
 	case ClideStateError:
 		content := errorStyle.
@@ -183,10 +198,10 @@ func (m Clide) View() string {
 			Render(fmt.Sprintf("Clide Error: %s.", m.error))
 
 		return fmt.Sprintf(
-            "%s\n\n%s\n\n%s",
-            headerView,
-            content,
-            helpView)
+			"%s\n\n%s\n\n%s",
+			headerView,
+			content,
+			helpView)
 	}
 
 	panic("unreachable")
