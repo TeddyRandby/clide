@@ -1,6 +1,7 @@
 package model
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/TeddyRandby/clide/node"
@@ -36,7 +37,7 @@ func (m Clide) SelectPath(name string) (Clide, tea.Cmd) {
 		}
 	}
 
-	return m.Error("No such command or module")
+	return m.Error(fmt.Sprintf("No command or module '%s'", name))
 }
 
 func (m Clide) updateInput(msg tea.Msg) (Clide, tea.Cmd) {

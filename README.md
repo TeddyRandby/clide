@@ -33,7 +33,7 @@ Lets do a traditional hello world! Simply add a script in the `.clide` directory
 ━┑
  ┝━.git
  ┕━.clide
-    ┕━hello.sh
+   ┕━hello.sh
 ```
 And `hello.sh`:
 ```bash
@@ -51,9 +51,9 @@ If you've ever built a backend with file system based routing, this will look ve
 ━┑
  ┝━.git
  ┕━.clide
-    ┕━hello.sh
-    ┕━[Person]
-        ┕━say_hello.sh
+   ┕━hello.sh
+   ┕━[Person]
+     ┕━say_hello.sh
 ```
 We've added a directory `[Person]` (brackets included), and thrown a new little script under it:
 ```bash
@@ -72,12 +72,12 @@ Sometimes instead of having the user type in a string, you want to give them an 
 ━┑
  ┝━.git
  ┕━.clide
-    ┝━hello.sh
-    ┝━[Person]
-    │  ┕━say_hello.sh
-    ┕━{Person}
-       ┝━person
-       ┕━say_hola.sh
+   ┝━hello.sh
+   ┝━[Person]
+   │ ┕━say_hello.sh
+   ┕━{Person}
+     ┝━person
+     ┕━say_hola.sh
 ```
 The script `say_hola.sh` is almost identical (because the argument has the same name, but our `[]` around the argument in the path are now `{}`. You could even just use a symlink! We do have a new file adjacent to `say_hola.sh`. Its called `person` and it has no extension. This is the script that Clide will use to find the choices for the list. Ours will look simple.
 ```bash
@@ -95,14 +95,14 @@ For the following shortcuts, we've extended our example file structure:
 ━┑
  ┝━.git
  ┕━.clide
-    ┝━hello.sh
-    ┝━AnimalFriends
-    │  ┕━Pet_Dog.sh
-    ┝━[Person]
-    │  ┕━say_hello.sh
-    ┕━{Person}
-       ┝━person
-       ┕━say_hola.sh
+   ┝━hello.sh
+   ┝━AnimalFriends
+   │ ┕━Pet_Dog.sh
+   ┝━[Person]
+   │ ┕━say_hello.sh
+   ┕━{Person}
+     ┝━person
+     ┕━say_hola.sh
 ```
 Navigating around the menus is great, but sometimes you know the command you want to run ahead of time. Clide provies several ways to shortcut your commands:
  - To shortcut commands, you can use any prefix of the command/module. Eg: `clide a p`
@@ -110,6 +110,13 @@ Navigating around the menus is great, but sometimes you know the command you wan
  - To shortcut arguments, use a `-` followed by the uppercase letters in the argument name. Eg: `clide -p=Alice say_hello`
 
 Its important to note that although you define these shortcuts by using uppercase letters, clide only ever shortcuts or passes arguments via lowercase letters.
+
+### Builltins
+Clide has support for builtin commands. Right now there is only one: `ls`. All builtins are prefixed with *@*.
+Eg: `clide @ ls` prints a list of all the executable leaves in the tree. This can be useful to help clide compose with other unix tools.
+
+Eg: List all clide commands, filter for commands with 'hello', and execute the last one.
+`clide $(clide @ ls | grep hello | awk -F\t 'END { print $3 }')`
 
 ### Inspiration and references
  - [Charm](https://charm.sh/)
