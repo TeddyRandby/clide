@@ -8,7 +8,6 @@ import (
 )
 
 func main() {
-
 	args := os.Args[1:]
 
 	params := make(map[string]string)
@@ -27,7 +26,7 @@ func main() {
 			leaves := c.Leaves()
 
 			for _, leaf := range leaves {
-				fmt.Printf("%s %s\n", leaf.Title(), leaf.Description())
+				fmt.Printf("%s\t%s\t%s\n", leaf.Title(), leaf.Description(), leaf.Steps())
 			}
 
 			return

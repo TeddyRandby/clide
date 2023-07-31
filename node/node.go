@@ -34,7 +34,7 @@ type CommandNodeParameters struct {
 	Shortcut string
 	Name     string
 	Type     string
-    Value    string
+	Value    string
 }
 
 func (n CommandNode) Title() string {
@@ -91,6 +91,25 @@ func (n CommandNode) Leaves() []CommandNode {
 	}
 
 	return leaves
+}
+
+func (n CommandNode) Steps() string {
+	steps := make([]string, 0)
+
+	node := &n
+
+	for node.Parent != nil {
+		steps = append(steps, node.Name)
+		node = node.Parent
+	}
+
+	result := make([]string, len(steps))
+	// Reverse the steps slice
+	for i := 0; i < len(steps); i++ {
+		result[len(steps)-1-i] = steps[i]
+	}
+
+	return strings.Join(result, " ")
 }
 
 func (n CommandNode) clideRelativePath() string {
