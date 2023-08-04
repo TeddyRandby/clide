@@ -199,6 +199,8 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 
 	cmd := exec.Command(sibling)
 
+    cmd.Env = m.env()
+
 	output, err := cmd.Output()
 
 	if err != nil {
@@ -263,6 +265,8 @@ func (m Clide) PromptInput() (Clide, tea.Cmd) {
 
 	if sibling != "" {
 		cmd := exec.Command(sibling)
+
+        cmd.Env = m.env()
 
 		output, err := cmd.Output()
 
