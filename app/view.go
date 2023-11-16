@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -15,10 +16,10 @@ func max(a, b int) int {
 }
 
 func min(a, b int) int {
-    if a > b {
-        return b
-    }
-    return a
+	if a > b {
+		return b
+	}
+	return a
 }
 
 var (
@@ -35,6 +36,8 @@ var (
 	gray   = lipgloss.Color("#6272A4")
 	black  = lipgloss.Color("#191A21")
 )
+
+var clide_header = "c l i d e"
 
 var (
 	titleStyle = func() lipgloss.Style {
@@ -85,7 +88,7 @@ var (
 )
 
 func (m Clide) headerView() string {
-	var renderedSteps []string
+	var steps []string
 
 	node := m.node
 
@@ -94,19 +97,15 @@ func (m Clide) headerView() string {
 	}
 
 	for node.Parent != nil {
-		renderedSteps = append(renderedSteps, sepStyle.Render("/"), stepStyle.Render(node.Name))
+		steps = append(steps, sepStyle.Render("/"), stepStyle.Render(node.Name))
 		node = node.Parent
 	}
 
-	reversed := make([]string, len(renderedSteps)+1)
+  steps = append(steps, sepStyle.Render(clide_header))
 
-	reversed[0] = titleStyle.Render("c l i d e")
+	slices.Reverse(steps)
 
-	for i := 0; i < len(renderedSteps); i++ {
-		reversed[i+1] = renderedSteps[len(renderedSteps)-i-1]
-	}
-
-	return lipgloss.JoinHorizontal(lipgloss.Center, reversed...)
+	return lipgloss.JoinHorizontal(lipgloss.Center, steps...)
 }
 
 func (m Clide) promptView() string {
@@ -116,7 +115,7 @@ func (m Clide) promptView() string {
 		var str string
 
 		if m.params[i].Value != "" {
-			str = stepStyle.Render(m.params[i].Value)
+			str = stepStyle.Render(m.params[i].Name)
 		} else {
 			str = promptStyle.Render(m.params[i].Name)
 		}
@@ -177,7 +176,7 @@ func (m Clide) View() string {
 
 		spaceRemaining := m.height - verticalSpace - 2
 
-        textareaHeight := min(spaceRemaining / 2, 8)
+		textareaHeight := min(spaceRemaining/2, 8)
 
 		m.textarea.SetHeight(textareaHeight)
 
@@ -185,7 +184,7 @@ func (m Clide) View() string {
 
 		return lipgloss.JoinVertical(lipgloss.Left,
 			lipgloss.JoinHorizontal(lipgloss.Right, headerView, m.promptView()),
-            "\n",
+			"\n",
 			m.textarea.View(),
 			strings.Repeat("\n", padding),
 			helpView,

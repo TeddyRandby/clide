@@ -8,7 +8,7 @@ import (
 	"unicode"
 
 	"github.com/TeddyRandby/clide/path"
-	"golang.org/x/exp/slices"
+  "slices"
 )
 
 const (
@@ -103,13 +103,9 @@ func (n CommandNode) Steps() string {
 		node = node.Parent
 	}
 
-	result := make([]string, len(steps))
-	// Reverse the steps slice
-	for i := 0; i < len(steps); i++ {
-		result[len(steps)-1-i] = steps[i]
-	}
+  slices.Reverse(steps)
 
-	return strings.Join(result, " ")
+	return strings.Join(steps, " ")
 }
 
 func (n CommandNode) clideRelativePath() string {

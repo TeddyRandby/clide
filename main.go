@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	clide "github.com/TeddyRandby/clide/app"
 	"os"
 	"strings"
+
+	clide "github.com/TeddyRandby/clide/app"
 )
 
 func main() {
