@@ -101,7 +101,7 @@ func (m Clide) headerView() string {
 		node = node.Parent
 	}
 
-  steps = append(steps, sepStyle.Render(clide_header))
+	steps = append(steps, sepStyle.Render(clide_header))
 
 	slices.Reverse(steps)
 
@@ -162,10 +162,10 @@ func (m Clide) View() string {
 		)
 
 	case ClideStatePromptSelect:
-		m.list.SetSize(m.width, m.height-verticalSpace-2)
+		m.list.SetSize(m.width, m.height-verticalSpace-1)
 
 		return fmt.Sprintf(
-			"%s\n%s\n%s",
+			"%s\n\n%s\n%s",
 			lipgloss.JoinHorizontal(lipgloss.Right, headerView, m.promptView()),
 			m.list.View(),
 			helpView,
