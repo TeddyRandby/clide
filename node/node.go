@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	NodeTypeCommand = "$ "
-	NodeTypeModule  = "[..] "
+	NodeTypeCommand = "$"
+	NodeTypeModule  = ">"
 )
 
 type CommandNode struct {
