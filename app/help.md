@@ -13,19 +13,19 @@ Clide is the Command Line Interface for Developer Experience!
 ## Examples
 At the top level of your git repository, add a new folder:
 ```
-─╮
+─┐
  ├─.git
- ╰─.clide
+ └─.clide
 ```
 The `.clide` folder is the root of all your command routes.
 
 ### Hello World
 Lets do a traditional hello world! Simply add a script in the `.clide` directory. 
 ```
-─╮
+─┐
  ├─.git
- ╰┬.clide
-  ╰─hello.sh
+ └┬.clide
+  └─hello.sh
 ```
 And `hello.sh`:
 ```bash
@@ -40,12 +40,12 @@ Often in little bash scripts its useful to have the user provide some input. Cli
 
 If you've ever built a backend with file system based routing, this will look very familiar.
 ```
-─╮
+─┐
  ├─.git
- ╰┬.clide
+ └┬.clide
   ├─hello.sh
-  ╰┬[Person]
-   ╰─say_hello.sh
+  └┬[Person]
+   └─say_hello.sh
 ```
 We've added a directory `[Person]` (brackets included), and thrown a new little script under it:
 ```bash
@@ -61,15 +61,15 @@ It can also be useful to have default values for these sorts of text inputs. To 
 ### Passing Select Arguments
 Sometimes instead of having the user type in a string, you want to give them an option from a list. Clide has that too! Lets see it in action.
 ```
-─╮
+─┐
  ├─.git
- ╰┬.clide
+ └┬.clide
   ├─hello.sh
   ├┬[Person]
-  │╰─say_hello.sh
-  ╰┬{Person}
+  │└─say_hello.sh
+  └┬{Person}
    ├─person
-   ╰─say_hola.sh
+   └─say_hola.sh
 ```
 The script `say_hola.sh` is almost identical (because the argument has the same name, but our `[]` around the argument in the path are now `{}`. You could even just use a symlink! We do have a new file adjacent to `say_hola.sh`. Its called `person` and it has no extension. This is the script that Clide will use to find the choices for the list. Ours will look simple.
 ```bash
@@ -84,17 +84,17 @@ Now, run Clide. Select `say_hola` and pick a friend!
 ### Shortcuts
 For the following shortcuts, we've extended our example file structure:
 ```
-─╮
+─┐
  ├─.git
- ╰┬.clide
+ └┬.clide
   ├─hello.sh
   ├┬AnimalFriends
-  │╰─Pet_Dog.sh
+  │└─Pet_Dog.sh
   ├┬[Person]
-  │╰─say_hello.sh
-  ╰┬{Person}
+  │└─say_hello.sh
+  └┬{Person}
    ├─person
-   ╰─say_hola.sh
+   └─say_hola.sh
 ```
 Navigating around the menus is great, but sometimes you know the command you want to run ahead of time. Clide provies several ways to shortcut your commands:
  - To shortcut commands, you can use any prefix of the command/module. Eg: `clide a p`
