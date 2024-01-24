@@ -31,7 +31,7 @@ func (m Clide) Backtrack() (Clide, tea.Cmd) {
 	parent := m.node.Parent
 
 	if parent == nil {
-		return m, nil
+    return m.PromptPath(m.node)
 	}
 
 	if m.param != 0 {
@@ -132,7 +132,7 @@ func (m Clide) newlist(items []list.Item) list.Model {
 	l := list.New(items, delegate, m.width, m.height)
 
 	l.SetShowHelp(false)
-	l.SetShowFilter(false)
+  l.SetShowTitle(false)
 	l.Styles.StatusBar.Foreground(gray)
 	l.Styles.StatusBarFilterCount.Foreground(gray)
 	l.Styles.StatusBarFilterCount.Foreground(gray)
@@ -174,8 +174,6 @@ func (m Clide) PromptPath(n *node.CommandNode) (Clide, tea.Cmd) {
 		state:  ClideStatePathSelect,
 		list:   m.newlist(items),
 	}
-
-    c.list.SetShowTitle(false)
 
     return c, nil
 }
@@ -250,8 +248,6 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 		state:  ClideStatePromptSelect,
 		list:   m.newlist(items),
 	}
-
-    c.list.SetShowTitle(false)
 
     return c, nil
 }

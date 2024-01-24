@@ -8,6 +8,14 @@ import (
 	clide "github.com/TeddyRandby/clide/app"
 )
 
+func is_builtin(args []string) bool {
+  return len(args) > 0 && args[0][0] == '@'
+}
+
+func get_builtin(args []string) string {
+  return args[0][1:]
+}
+
 func main() {
 	args := os.Args[1:]
 
@@ -19,23 +27,9 @@ func main() {
 		return
 	}
 
-	if len(args) > 0 && args[0] == "@" {
-		// Process the args as builtins, don't run
-		switch args[1] {
-		case "ls":
-
-			leaves := c.Leaves()
-
-			for _, leaf := range leaves {
-				fmt.Printf("%s\t%s\t%s\n", leaf.Title(), leaf.Description(), leaf.Steps())
-			}
-
-			return
-		default:
-			m, _ := c.Error(fmt.Sprintf("Unknown builtin command '%s'", args[1]))
-			m.Run()
-			return
-		}
+	if is_builtin(args) {
+    c.Builtin(get_builtin(args))
+    return
 	}
 
 	steps := make([]string, 0)

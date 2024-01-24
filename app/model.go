@@ -1,6 +1,7 @@
 package model
 
 import (
+	_ "embed"
 	"fmt"
 	"os"
 	"syscall"
@@ -29,6 +30,7 @@ type KeyMap struct {
 	Next    key.Binding
 	Prev    key.Binding
 	Root    key.Binding
+  Search  key.Binding
 	Quit    key.Binding
 	VimNext key.Binding
 	VimPrev key.Binding
@@ -57,6 +59,10 @@ var DefaultKeyMap = KeyMap{
 		key.WithKeys("ctrl+r"),
 		key.WithHelp("ctrl+r", "root"),
 	),
+  Search: key.NewBinding(
+    key.WithKeys("/"),
+    key.WithHelp("/", "search"),
+  ),
 	Quit: key.NewBinding(
 		key.WithKeys("ctrl+c"),
 		key.WithHelp("ctrl+c", "quit"),
@@ -80,7 +86,7 @@ var DefaultKeyMap = KeyMap{
 }
 
 func (k KeyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Up, k.Down, k.Next, k.Prev, k.Root, k.Quit}
+	return []key.Binding{k.Up, k.Down, k.Next, k.Prev, k.Search, k.Quit}
 }
 
 func (k KeyMap) FullHelp() [][]key.Binding {
@@ -171,7 +177,7 @@ func (m Clide) env() []string {
 func (m Clide) Run() {
 	if m.state == ClideStateDone {
 		syscall.Exec(m.node.Path, []string{m.node.Name}, m.env())
-        return
+		return
 	}
 
 	c, err := tea.NewProgram(m).Run()
@@ -185,5 +191,30 @@ func (m Clide) Run() {
 
 	if m.state == ClideStateDone {
 		syscall.Exec(m.node.Path, []string{m.node.Name}, m.env())
+	}
+}
+
+const (
+  ClideBuiltinLS = "ls"
+  ClideBuiltinHelp = "help"
+)
+
+//go:embed help.md
+var ClideHelp string
+
+func (m Clide) Builtin(cmd string) {
+	switch cmd {
+  case ClideBuiltinHelp:
+    fmt.Println(ClideHelp)
+	case ClideBuiltinLS:
+		leaves := m.Leaves()
+
+		for _, leaf := range leaves {
+			fmt.Printf("%s\t%s\t%s\n", leaf.Title(), leaf.Description(), leaf.Steps())
+		}
+
+	default:
+		m, _ := m.Error(fmt.Sprintf("Unknown builtin command '%s'", cmd))
+		m.Run()
 	}
 }
