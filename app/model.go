@@ -212,7 +212,6 @@ func (m Clide) Builtin(cmd string) {
 		for _, leaf := range leaves {
 			fmt.Printf("%s\t%s\t%s\n", leaf.Title(), leaf.Description(), leaf.Steps())
 		}
-
 	default:
 		m, _ := m.Error(fmt.Sprintf("Unknown builtin command '%s'", cmd))
 		m.Run()

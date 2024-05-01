@@ -31,7 +31,7 @@ func (m Clide) Backtrack() (Clide, tea.Cmd) {
 	parent := m.node.Parent
 
 	if parent == nil {
-    return m.PromptPath(m.node)
+		return m.PromptPath(m.node)
 	}
 
 	if m.param != 0 {
@@ -132,7 +132,7 @@ func (m Clide) newlist(items []list.Item) list.Model {
 	l := list.New(items, delegate, m.width, m.height)
 
 	l.SetShowHelp(false)
-  l.SetShowTitle(false)
+	l.SetShowTitle(false)
 	l.Styles.StatusBar.Foreground(gray)
 	l.Styles.StatusBarFilterCount.Foreground(gray)
 	l.Styles.StatusBarFilterCount.Foreground(gray)
@@ -160,7 +160,7 @@ func (m Clide) PromptPath(n *node.CommandNode) (Clide, tea.Cmd) {
 		items[i] = list.Item(choice)
 	}
 
-    c := Clide{
+	c := Clide{
 		ready:  m.ready,
 		width:  m.width,
 		height: m.height,
@@ -175,7 +175,7 @@ func (m Clide) PromptPath(n *node.CommandNode) (Clide, tea.Cmd) {
 		list:   m.newlist(items),
 	}
 
-    return c, nil
+	return c, nil
 }
 
 type item struct {
@@ -197,7 +197,7 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 
 	cmd := exec.Command(sibling)
 
-    cmd.Env = m.env()
+	cmd.Env = m.env()
 
 	output, err := cmd.Output()
 
@@ -234,7 +234,7 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 		}
 	}
 
-    c := Clide{
+	c := Clide{
 		ready:  m.ready,
 		width:  m.width,
 		height: m.height,
@@ -249,7 +249,7 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 		list:   m.newlist(items),
 	}
 
-    return c, nil
+	return c, nil
 }
 
 func (m Clide) PromptInput() (Clide, tea.Cmd) {
@@ -257,12 +257,12 @@ func (m Clide) PromptInput() (Clide, tea.Cmd) {
 
 	sibling := path.HasSibling(m.node.Path, name)
 
-    defaultValue := ""
+	defaultValue := ""
 
 	if sibling != "" {
 		cmd := exec.Command(sibling)
 
-        cmd.Env = m.env()
+		cmd.Env = m.env()
 
 		output, err := cmd.Output()
 
@@ -288,7 +288,7 @@ func (m Clide) PromptInput() (Clide, tea.Cmd) {
 		textarea: textarea.New(),
 	}
 
-    c.textarea.SetValue(defaultValue)
+	c.textarea.SetValue(defaultValue)
 	c.textarea.CharLimit = 200
 	c.textarea.ShowLineNumbers = false
 	c.textarea.FocusedStyle.Prompt.Margin(0, 0, 0, 1)

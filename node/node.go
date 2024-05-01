@@ -8,7 +8,7 @@ import (
 	"unicode"
 
 	"github.com/TeddyRandby/clide/path"
-  "slices"
+	"slices"
 )
 
 const (
@@ -103,7 +103,7 @@ func (n CommandNode) Steps() string {
 		node = node.Parent
 	}
 
-  slices.Reverse(steps)
+	slices.Reverse(steps)
 
 	return strings.Join(steps, " ")
 }
