@@ -34,7 +34,8 @@ type CommandNodeParameters struct {
 	Shortcut string
 	Name     string
 	Type     string
-	Value    string
+	Value    []string
+	Multi    bool
 }
 
 func (n CommandNode) Title() string {
@@ -126,19 +127,20 @@ func (n CommandNode) Parameters() []CommandNodeParameters {
 	steps := n.clideRelativeSteps()
 
 	for _, step := range steps {
-		if strings.ContainsAny(step, path.ParamInputChars) {
+		if path.IsInputParameter(step) {
 			name, shortcut := parameterNameAndShortcut(step)
 			params = append(params, CommandNodeParameters{
 				Name:     name,
 				Shortcut: shortcut,
 				Type:     CommandNodeParamTypeInput,
 			})
-		} else if strings.ContainsAny(step, path.ParamSelectChars) {
+		} else if path.IsSelectParameter(step) {
 			name, shortcut := parameterNameAndShortcut(step)
 			params = append(params, CommandNodeParameters{
 				Name:     name,
 				Shortcut: shortcut,
 				Type:     CommandNodeParamTypeSelect,
+				Multi:    path.IsMulti(step),
 			})
 		}
 	}

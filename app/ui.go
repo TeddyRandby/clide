@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
+	"golang.org/x/exp/slices"
 )
 
 var (
@@ -36,7 +37,7 @@ func (m Clide) Backtrack() (Clide, tea.Cmd) {
 
 	if m.param != 0 {
 		m.param--
-		m.params[m.param].Value = ""
+		m.params[m.param].Value = make([]string, 0)
 		return m.nextParameter()
 	}
 
@@ -98,15 +99,35 @@ func (m Clide) Done() (Clide, tea.Cmd) {
 	return clide, tea.Quit
 }
 
-func (m Clide) SetAndPromptNextParameter(value string) (Clide, tea.Cmd) {
-	m.params[m.param].Value = value
+func (m Clide) Param() node.CommandNodeParameters {
+  return m.params[m.param]
+}
+
+func (m Clide) Set(value string) {
+  values := m.Param().Value
+  index := slices.Index(values, value)
+
+  if index >= 0 {
+    m.params[m.param].Value = slices.Delete(values, index, index+1)
+  } else {
+    m.params[m.param].Value = append(values, value)
+  }
+}
+
+func (m Clide) PromptParameter() (Clide, tea.Cmd){
 	m.param++
 
 	if len(m.params) > m.param {
 		return m.nextParameter()
 	}
 
-	return m.Done()
+  return m.Done()
+}
+
+func (m Clide) SetAndPrompParameter(value string) (Clide, tea.Cmd) {
+  m.Set(value)
+
+  return m.PromptParameter()
 }
 
 func (m Clide) nextParameter() (Clide, tea.Cmd) {
@@ -114,7 +135,7 @@ func (m Clide) nextParameter() (Clide, tea.Cmd) {
 
 	shortcutValue := m.args[param.Shortcut]
 	if shortcutValue != "" {
-		return m.SetAndPromptNextParameter(shortcutValue)
+		return m.SetAndPrompParameter(shortcutValue)
 	}
 
 	switch param.Type {
@@ -208,6 +229,8 @@ func (m Clide) PromptSelect() (Clide, tea.Cmd) {
 	trimmed := strings.Trim(string(output), " \n\t")
 
 	options := strings.Split(trimmed, "\n")
+
+  options = slices.Compact(options)
 
 	if len(options) == 0 {
 		return m.Error(fmt.Sprintf("%s yielded no options", name))

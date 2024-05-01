@@ -114,7 +114,7 @@ func (m Clide) promptView() string {
 	for i := 0; i < m.param+1; i++ {
 		var str string
 
-		if m.params[i].Value != "" {
+		if i < m.param {
 			str = stepStyle.Render(m.params[i].Name)
 		} else {
 			str = promptStyle.Render(m.params[i].Name)
@@ -126,6 +126,30 @@ func (m Clide) promptView() string {
 	return lipgloss.JoinHorizontal(lipgloss.Center, params...)
 }
 
+func (m Clide) preview() string {
+	if len(m.params) == 0 {
+    return ""
+	}
+
+  if !m.Param().Multi {
+    return ""
+  }
+
+	num := len(m.Param().Value)
+	str := strings.Join(m.Param().Value, ", ")
+
+	var sep string
+	if num > 0 {
+		sep = ":"
+	} else {
+		sep = "."
+	}
+
+	prefix := stepStyle.Render(fmt.Sprintf("%d selected%s", num, sep))
+
+	return lipgloss.JoinHorizontal(lipgloss.Left, prefix, str)
+}
+
 func (m Clide) helpView() string {
 	m.help.Styles.ShortKey.Foreground(gray)
 	m.help.Styles.ShortDesc.Foreground(gray)
@@ -133,16 +157,12 @@ func (m Clide) helpView() string {
 }
 
 func (m Clide) View() string {
-	if !m.ready {
-		return "Initializing..."
-	}
-
 	m.help.Width = m.width
 
 	helpView := m.helpView()
 	headerView := m.headerView()
 
-	verticalSpace := lipgloss.Height(headerView) + lipgloss.Height(helpView)
+	verticalSpace := lipgloss.Height(headerView) + lipgloss.Height(helpView) + 1
 
 	switch m.state {
 
@@ -152,54 +172,48 @@ func (m Clide) View() string {
 		return ""
 
 	case ClideStatePathSelect:
-		m.list.SetSize(m.width, m.height-verticalSpace-2)
+		m.list.SetSize(m.width, m.height-verticalSpace)
 
-		return fmt.Sprintf(
-			"%s\n\n%s\n\n%s",
+		return lipgloss.JoinVertical(lipgloss.Left,
 			headerView,
 			m.list.View(),
+			m.preview(),
 			helpView,
 		)
 
 	case ClideStatePromptSelect:
-		m.list.SetSize(m.width, m.height-verticalSpace-1)
-
-		return fmt.Sprintf(
-			"%s\n\n%s\n%s",
+		m.list.SetSize(m.width, m.height-verticalSpace)
+		return lipgloss.JoinVertical(lipgloss.Left,
 			lipgloss.JoinHorizontal(lipgloss.Right, headerView, m.promptView()),
 			m.list.View(),
+			m.preview(),
 			helpView,
 		)
 
 	case ClideStatePromptInput:
 		m.textarea.SetWidth(m.width)
 
-		spaceRemaining := m.height - verticalSpace - 2
+		spaceRemaining := m.height - verticalSpace
 
-		textareaHeight := min(spaceRemaining/2, 8)
-
-		m.textarea.SetHeight(textareaHeight)
-
-		padding := spaceRemaining - textareaHeight - 1
+		m.textarea.SetHeight(spaceRemaining)
 
 		return lipgloss.JoinVertical(lipgloss.Left,
 			lipgloss.JoinHorizontal(lipgloss.Right, headerView, m.promptView()),
-			"\n",
 			m.textarea.View(),
-			strings.Repeat("\n", padding),
+			m.preview(),
 			helpView,
 		)
 
 	case ClideStateError:
 		content := errorStyle.
 			Copy().
-			Height(m.height - verticalSpace - 2).
+			Height(m.height - verticalSpace).
 			Render(fmt.Sprintf("Clide Error: %s.", m.error))
 
-		return fmt.Sprintf(
-			"%s\n\n%s\n\n%s",
+		return lipgloss.JoinVertical(lipgloss.Left,
 			headerView,
 			content,
+			m.preview(),
 			helpView)
 	}
 

@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"os"
+	"strings"
 	"syscall"
 
 	"github.com/TeddyRandby/clide/node"
@@ -30,8 +31,9 @@ type KeyMap struct {
 	Next    key.Binding
 	Prev    key.Binding
 	Root    key.Binding
-  Search  key.Binding
+	Search  key.Binding
 	Quit    key.Binding
+	Select  key.Binding
 	VimNext key.Binding
 	VimPrev key.Binding
 	VimRoot key.Binding
@@ -41,34 +43,34 @@ type KeyMap struct {
 var DefaultKeyMap = KeyMap{
 	Up: key.NewBinding(
 		key.WithKeys("up", "k"),
-		key.WithHelp("/k", "up"),
+		key.WithHelp(",k", "up"),
 	),
 	Down: key.NewBinding(
 		key.WithKeys("down", "j"),
-		key.WithHelp("/j", "down"),
+		key.WithHelp(",j", "down"),
 	),
 	Next: key.NewBinding(
 		key.WithKeys("right", "enter"),
-		key.WithHelp("→/enter", "next"),
+		key.WithHelp("→,enter", "next"),
 	),
 	Prev: key.NewBinding(
 		key.WithKeys("left", "esc"),
-		key.WithHelp("←/esc", "previous"),
+		key.WithHelp("←,esc", "previous"),
 	),
 	Root: key.NewBinding(
 		key.WithKeys("ctrl+r"),
 		key.WithHelp("ctrl+r", "root"),
 	),
-  Search: key.NewBinding(
-    key.WithKeys("/"),
-    key.WithHelp("/", "search"),
-  ),
+	Search: key.NewBinding(
+		key.WithKeys("/"),
+		key.WithHelp("/", "search"),
+	),
 	Quit: key.NewBinding(
 		key.WithKeys("ctrl+c"),
 		key.WithHelp("ctrl+c", "quit"),
 	),
 	VimNext: key.NewBinding(
-		key.WithKeys("l", " "),
+		key.WithKeys("l"),
 		key.WithHelp("l", "next"),
 	),
 	VimPrev: key.NewBinding(
@@ -82,6 +84,10 @@ var DefaultKeyMap = KeyMap{
 	VimQuit: key.NewBinding(
 		key.WithKeys("q"),
 		key.WithHelp("q", "quit"),
+	),
+	Select: key.NewBinding(
+		key.WithKeys(" "),
+		key.WithHelp("space", "select"),
 	),
 }
 
@@ -168,7 +174,8 @@ func (m Clide) env() []string {
 	env = append(env, "CLIDE_PATH="+m.root.Path)
 
 	for i := 0; i < len(m.params); i++ {
-		env = append(env, m.params[i].Name+"="+m.params[i].Value)
+    val := strings.Join(m.params[i].Value, "\n")
+		env = append(env, m.params[i].Name+"="+val)
 	}
 
 	return env
@@ -195,8 +202,8 @@ func (m Clide) Run() {
 }
 
 const (
-  ClideBuiltinLS = "ls"
-  ClideBuiltinHelp = "help"
+	ClideBuiltinLS   = "ls"
+	ClideBuiltinHelp = "help"
 )
 
 //go:embed help.md
@@ -204,8 +211,8 @@ var ClideHelp string
 
 func (m Clide) Builtin(cmd string) {
 	switch cmd {
-  case ClideBuiltinHelp:
-    fmt.Println(ClideHelp)
+	case ClideBuiltinHelp:
+		fmt.Println(ClideHelp)
 	case ClideBuiltinLS:
 		leaves := m.Leaves()
 

@@ -7,9 +7,13 @@ import (
 )
 
 const (
-    ParamInputChars = "[]"
-    ParamSelectChars = "{}"
-    ParamChars = ParamInputChars + ParamSelectChars
+	ParamInputPrefix  = "["
+	ParamInputSuffix  = "]"
+	ParamSelectPrefix = "{"
+	ParamSelectSuffix = "}"
+	ParamSelectMulti  = "+"
+	ParamBracketChars = ParamInputPrefix + ParamInputSuffix + ParamSelectPrefix + ParamSelectSuffix
+	ParamChars        = ParamBracketChars + ParamSelectMulti
 )
 
 func Exists(filename string) bool {
@@ -19,13 +23,13 @@ func Exists(filename string) bool {
 }
 
 func HasSibling(path string, child string) string {
-    sibling := filepath.Join(path, "..", child)
+	sibling := filepath.Join(path, "..", child)
 
-    if Exists(sibling) {
-        return sibling
-    }
+	if Exists(sibling) {
+		return sibling
+	}
 
-    return ""
+	return ""
 }
 
 func Children(path string) ([]string, error) {
@@ -45,7 +49,7 @@ func Children(path string) ([]string, error) {
 }
 
 func Parent(path string) string {
-    return filepath.Join(path, "..")
+	return filepath.Join(path, "..")
 }
 
 func IsLeaf(path string) bool {
@@ -58,18 +62,41 @@ func IsLeaf(path string) bool {
 	return !info.IsDir()
 }
 
+func hasPrefixAndSuffix(s string, prefix string, suffix string) bool {
+	return strings.HasPrefix(s, prefix) && strings.HasSuffix(s, suffix)
+}
+
+func IsMulti(path string) bool {
+	p := filepath.Base(path)
+
+  trimmed := strings.Trim(p, ParamBracketChars)
+
+	return strings.HasSuffix(trimmed, ParamSelectMulti)
+}
+
+func IsSelectParameter(path string) bool {
+	p := filepath.Base(path)
+
+	return hasPrefixAndSuffix(p, ParamSelectPrefix, ParamSelectSuffix)
+}
+
+func IsInputParameter(path string) bool {
+	p := filepath.Base(path)
+
+	return hasPrefixAndSuffix(p, ParamInputPrefix, ParamInputSuffix)
+}
+
 func IsParameter(path string) bool {
-    return strings.ContainsAny(filepath.Base(path), ParamChars)
+	return IsSelectParameter(path) || IsInputParameter(path)
 }
 
 func IsModule(path string) bool {
-    return !IsLeaf(path) 
+	return !IsLeaf(path)
 }
 
 func IsRoot(path string) bool {
-    return Exists(filepath.Join(path, ".clide"))
+	return Exists(filepath.Join(path, ".clide"))
 }
-
 
 func findRoot(path string) (string, error) {
 	if Exists(filepath.Join(path, ".git")) {
@@ -80,13 +107,13 @@ func findRoot(path string) (string, error) {
 		return "", nil
 	}
 
-    parentPath := filepath.Join(path, "..")
+	parentPath := filepath.Join(path, "..")
 
-    if parentPath == path {
-        return "", nil
-    }
+	if parentPath == path {
+		return "", nil
+	}
 
-    return findRoot(parentPath)
+	return findRoot(parentPath)
 }
 
 func FindRoot() (string, error) {
