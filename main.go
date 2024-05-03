@@ -36,15 +36,15 @@ func main() {
 
 	for _, arg := range args {
 		if arg[0] == '-' {
-			split := strings.Split(arg, "=")
+			name, value, found := strings.Cut(arg, "=")
 
-			if len(split) == 1 {
+			if !found {
 				m, _ := c.Error(fmt.Sprintf("Argument '%s' has no value", arg))
 				m.Run()
 				return
 			}
 
-			params[split[0][1:]] = split[1]
+      params[name[1:]] = value
 		} else {
 			steps = append(steps, strings.ToLower(arg))
 		}
