@@ -99,7 +99,7 @@ func (m Clide) Done() (Clide, tea.Cmd) {
 	return clide, tea.Quit
 }
 
-func (m Clide) Param() node.CommandNodeParameters {
+func (m Clide) Param() node.CommandNodeParameter {
   return m.params[m.param]
 }
 

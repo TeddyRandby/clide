@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/TeddyRandby/clide/node"
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -90,15 +91,15 @@ var (
 func (m Clide) headerView() string {
 	var steps []string
 
-	node := m.node
+	n := m.node
 
-	if node == nil {
+	if n == nil {
 		return ""
 	}
 
-	for node.Parent != nil {
-		steps = append(steps, sepStyle.Render("/"), stepStyle.Render(node.Name))
-		node = node.Parent
+	for n.Parent != nil {
+		steps = append(steps, sepStyle.Render("/"), stepStyle.Render(n.Name))
+		n = n.Parent
 	}
 
 	steps = append(steps, sepStyle.Render(clide_header))
@@ -115,9 +116,9 @@ func (m Clide) promptView() string {
 		var str string
 
 		if i < m.param {
-			str = stepStyle.Render(m.params[i].Name)
+			str = stepStyle.Render(strings.Join(m.params[i].Value, ", "))
 		} else {
-			str = promptStyle.Render(m.params[i].Name)
+			str = promptStyle.Render(m.preview())
 		}
 
 		params = append(params, str, sepStyle.Render("/"))
@@ -128,26 +129,23 @@ func (m Clide) promptView() string {
 
 func (m Clide) preview() string {
 	if len(m.params) == 0 {
-    return ""
+		return ""
 	}
 
-  if !m.Param().Multi {
-    return ""
+	var str string
+
+	switch m.Param().Type {
+	case node.CommandNodeParamTypeInput:
+		str = m.textarea.Value()
+	case node.CommandNodeParamTypeSelect:
+    str = strings.Join(m.Param().Value, ", ")
+	}
+
+  if str == "" {
+    return m.Param().Name
+  } else {
+    return str
   }
-
-	num := len(m.Param().Value)
-	str := strings.Join(m.Param().Value, ", ")
-
-	var sep string
-	if num > 0 {
-		sep = ":"
-	} else {
-		sep = "."
-	}
-
-	prefix := stepStyle.Render(fmt.Sprintf("%d selected%s", num, sep))
-
-	return lipgloss.JoinHorizontal(lipgloss.Left, prefix, str)
 }
 
 func (m Clide) helpView() string {
@@ -177,7 +175,6 @@ func (m Clide) View() string {
 		return lipgloss.JoinVertical(lipgloss.Left,
 			headerView,
 			m.list.View(),
-			m.preview(),
 			helpView,
 		)
 
@@ -186,7 +183,6 @@ func (m Clide) View() string {
 		return lipgloss.JoinVertical(lipgloss.Left,
 			lipgloss.JoinHorizontal(lipgloss.Right, headerView, m.promptView()),
 			m.list.View(),
-			m.preview(),
 			helpView,
 		)
 
@@ -200,7 +196,6 @@ func (m Clide) View() string {
 		return lipgloss.JoinVertical(lipgloss.Left,
 			lipgloss.JoinHorizontal(lipgloss.Right, headerView, m.promptView()),
 			m.textarea.View(),
-			m.preview(),
 			helpView,
 		)
 
@@ -213,7 +208,6 @@ func (m Clide) View() string {
 		return lipgloss.JoinVertical(lipgloss.Left,
 			headerView,
 			content,
-			m.preview(),
 			helpView)
 	}
 

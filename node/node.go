@@ -30,12 +30,15 @@ const (
 	CommandNodeParamTypeSelect = "Select"
 )
 
-type CommandNodeParameters struct {
+type CommandNodeParameter struct {
 	Shortcut string
 	Name     string
 	Type     string
 	Value    []string
-	Multi    bool
+}
+
+func (p CommandNodeParameter) HasValue() bool {
+  return len(p.Value) > 0
 }
 
 func (n CommandNode) Title() string {
@@ -121,26 +124,25 @@ func (n CommandNode) clideRelativeSteps() []string {
 	return steps[root+1:]
 }
 
-func (n CommandNode) Parameters() []CommandNodeParameters {
-	params := make([]CommandNodeParameters, 0)
+func (n CommandNode) Parameters() []CommandNodeParameter {
+	params := make([]CommandNodeParameter, 0)
 
 	steps := n.clideRelativeSteps()
 
 	for _, step := range steps {
 		if path.IsInputParameter(step) {
 			name, shortcut := parameterNameAndShortcut(step)
-			params = append(params, CommandNodeParameters{
+			params = append(params, CommandNodeParameter{
 				Name:     name,
 				Shortcut: shortcut,
 				Type:     CommandNodeParamTypeInput,
 			})
 		} else if path.IsSelectParameter(step) {
 			name, shortcut := parameterNameAndShortcut(step)
-			params = append(params, CommandNodeParameters{
+			params = append(params, CommandNodeParameter{
 				Name:     name,
 				Shortcut: shortcut,
 				Type:     CommandNodeParamTypeSelect,
-				Multi:    path.IsMulti(step),
 			})
 		}
 	}

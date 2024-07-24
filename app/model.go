@@ -114,7 +114,7 @@ type Clide struct {
 	spinner  spinner.Model
 	node     *node.CommandNode
 	root     *node.CommandNode
-	params   []node.CommandNodeParameters
+	params   []node.CommandNodeParameter
 	param    int
 	args     map[string]string
 	keymap   KeyMap

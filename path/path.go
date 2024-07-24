@@ -11,9 +11,8 @@ const (
 	ParamInputSuffix  = "]"
 	ParamSelectPrefix = "{"
 	ParamSelectSuffix = "}"
-	ParamSelectMulti  = "+"
 	ParamBracketChars = ParamInputPrefix + ParamInputSuffix + ParamSelectPrefix + ParamSelectSuffix
-	ParamChars        = ParamBracketChars + ParamSelectMulti
+	ParamChars        = ParamBracketChars
 )
 
 func Exists(filename string) bool {
@@ -64,14 +63,6 @@ func IsLeaf(path string) bool {
 
 func hasPrefixAndSuffix(s string, prefix string, suffix string) bool {
 	return strings.HasPrefix(s, prefix) && strings.HasSuffix(s, suffix)
-}
-
-func IsMulti(path string) bool {
-	p := filepath.Base(path)
-
-  trimmed := strings.Trim(p, ParamBracketChars)
-
-	return strings.HasSuffix(trimmed, ParamSelectMulti)
 }
 
 func IsSelectParameter(path string) bool {

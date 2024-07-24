@@ -143,20 +143,11 @@ func (m Clide) updateSelect(msg tea.Msg) (Clide, tea.Cmd) {
 		case key.Matches(msg, m.keymap.Root):
 			return m.Root()
 
-    case key.Matches(msg, m.keymap.Select):
-      if m.Param().Multi {
-        m.Set(m.list.SelectedItem().FilterValue())
-      }
-
 		case key.Matches(msg, m.keymap.VimNext):
 			fallthrough
 		case key.Matches(msg, m.keymap.Next):
 			if !m.list.SettingFilter() {
-        if m.Param().Multi {
-          return m.PromptParameter()
-        } else {
-          return m.SetAndPrompParameter(m.list.SelectedItem().FilterValue())
-        }
+        return m.PromptParameter()
 			}
 
 		case key.Matches(msg, m.keymap.VimPrev):
@@ -166,6 +157,8 @@ func (m Clide) updateSelect(msg tea.Msg) (Clide, tea.Cmd) {
 		case key.Matches(msg, m.keymap.Prev):
 			return m.Backtrack()
 
+    case key.Matches(msg, m.keymap.Select):
+      m.Set(m.list.SelectedItem().FilterValue())
 		}
 	}
 

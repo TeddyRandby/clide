@@ -81,6 +81,36 @@ Each line that this script outputs will be an option in the list - everything be
 
 Now, run Clide. Select `say_hola` and pick a friend!
 
+#### Multi-select
+To turn a select into a multi-select, add a '+' at the end of the argument name.
+```
+─┐
+ ├─.git
+ └┬.clide
+  ├─hello.sh
+  ├┬[Person]
+  │└─say_hello.sh
+  ├┬{Person}
+  │├─person
+  │└─say_hola.sh
+  └┬{People+}
+   ├─people
+   └─greet.sh
+```
+```bash
+#!/usr/bin/env sh
+# people
+
+printf "Alice:A friend:Alice Smith\nBob:Another friend:Bob Smith\n"
+```
+```bash
+#!/usr/bin/bash
+# greet.sh
+
+printf "Greetings to:\n%s" "$people"
+```
+Now, the user can select multiple values with `<space>`, and proceed with `<enter>`.
+
 ### Shortcuts
 For the following shortcuts, we've extended our example file structure:
 ```
