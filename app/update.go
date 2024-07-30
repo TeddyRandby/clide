@@ -146,7 +146,7 @@ func (m Clide) updateSelect(msg tea.Msg) (Clide, tea.Cmd) {
 		case key.Matches(msg, m.keymap.VimNext):
 			fallthrough
 		case key.Matches(msg, m.keymap.Next):
-			if !m.list.SettingFilter() {
+			if !m.list.SettingFilter() && m.Param().HasValue() {
         return m.PromptParameter()
 			}
 
