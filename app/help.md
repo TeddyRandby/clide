@@ -1,6 +1,8 @@
 # *C L I D E*
 Clide is the Command Line Interface for Developer Experience!
 
+#![Demo](./resources/demo.svg)
+
 ## Problem
 - Is your codebase littered with useful bash scripts and yarn commands?
 - Do they all require passing parameters in a different way?
